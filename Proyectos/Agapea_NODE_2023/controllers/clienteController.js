@@ -1,13 +1,19 @@
 //modulo de node q define un objeto javascript q tiene como metodos las funciones middleware a ejecutar con las rutas /Cliente/,,,
-var mailjet=require('node-mailjet');
+//var mailjet=require('node-mailjet');
 var mongoose=require('mongoose');
 var bcryptjs=require('bcryptjs');
 
 var Cliente=require('../models/cliente');
 var Cuenta=require('../models/cuenta');
 
+var MandarMail=require('../models/enviarMailjet');
+
 module.exports={
-    loginget: (req,res,next)=>{},
+    loginget: (req,res,next)=>{
+        res.status(200).render(
+            'Cliente/Login.hbs',{ layout: null }
+        );
+    },
     loginpost: (req,res,next)=>{},
     registroget: (req,res,next)=>{
             
@@ -52,6 +58,7 @@ module.exports={
                     await _cuentaCliente.save();
                     await _clienteNuevo.save();
                     //3º si todo ok mandar email de activacion de cuenta usando node-mailjet, y  redireccionar a vista RegistroOK
+                    MandarMail.MandarMailJet(_cuentaCliente.email);
                     res.status(200).render('Cliente/RegistroOK.hbs',{ layout:null }); 
 
             } else {
