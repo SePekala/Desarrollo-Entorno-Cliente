@@ -60,7 +60,7 @@ module.exports={
             console.log({_cuentaCliente});
             console.log({_clienteNuevo});
 
-            const __bodyEmail = '<h3><strong>Se ha registrado correctamente en Agapea.com</strong></h3><br>Pulsa <a href=`http://localhost:3000/Cliente/Registro/activarcuentaget`>AQUI</a> para activar tu cuenta";'
+            const __bodyEmail = `<h3><strong>Se ha registrado correctamente en Agapea.com</strong></h3><br>Pulsa <a href='http://localhost:3000/Cliente/ActivarCuenta/${_cuentaCliente._id}'>AQUI</a> para activar tu cuenta;`
             MandarMail(_cuentaCliente.email,"Activa tu cuenta en Agapea.com",__bodyEmail);
             res.status(200).render('Cliente/RegistroOK.hbs',{ layout:null }); 
             
@@ -91,13 +91,14 @@ module.exports={
 
 
 
-    }
-    /*activarcuentaget: (req,res,next)=>{
+    },
+    activarcuentaget: (req,res,next)=>{
+        var id = req.params.id;
         if(res.status(200))
         {
             metodoActivarCuenta(id);
         }
        
-    }*/
+    }
 
 }
