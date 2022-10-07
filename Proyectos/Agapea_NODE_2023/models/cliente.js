@@ -6,13 +6,15 @@ var mongoose=require('mongoose');
 
 var clienteSchema=new mongoose.Schema(
     {
-        nombre: { type:String, required: true, default:'' },
-        apellidos: { type: String, required: true, default: ''},
+        nombre: { type:String, required: [true,'* Nombre obligatorio'], default:'' },
+        apellidos: { type: String, required: [true,'* Apellidos obligatorios'], default: ''},
         fechaNacimiento: { type: Date, default: new Date() },
         genero: { type: String, default: '' },
-        telefono: { type: String, match:/^\d{3}(\s\d{2}){3}$/, required: true },
+        telefono: { type: String, 
+                    required: [true, '*Telefono obligatorio'],
+                    match:[/^\d{3}(\s\d{2}){3}$/, 'El telefono tiene que ser formato 666 11 22 33'  ]},
         descripcion: { type: String, default: ''},
-        nif: { type: String, match:/^[0-9]{8}-?[a-zA-Z]$/, default:'00000000A' },
+        nif: { type: String, match:[/^[0-9]{8}-?[a-zA-Z]$/, '*El NIF tiene que tener formato 12345678-A o sin guion'], default:'00000000A' },
         cuenta: { type: mongoose.Schema.Types.ObjectId, ref: 'Cuenta'},
         direcciones:[ 
                         { type: mongoose.Schema.Types.ObjectId, ref: 'Direccion'}

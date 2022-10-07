@@ -35,6 +35,16 @@
       <div class="row">
         <span class="text-danger">{{errorServer}}</span>
       </div>
+    {{else}}  
+      {{#with errores}}
+          {{#if login}}<span class="text-danger">{{login.message}}</span><br>{{/if}}
+          {{#if email}}<span class="text-danger">{{email.message}}</span><br>{{/if}}
+          {{#if password}}<span class="text-danger">{{password.message}}</span><br>{{/if}}
+          
+          {{#if nombre}}<span class="text-danger">{{nombre.message}}</span><br>{{/if}}
+          {{#if apellidos}}<span class="text-danger">{{apellidos.message}}</span><br>{{/if}}
+          {{#if telefono}}<span class="text-danger">{{telefono.message}}</span><br>{{/if}}
+      {{/with}} 
     {{/if}}
     <!-- ---------------------------------------------------------------------------- -->
 
