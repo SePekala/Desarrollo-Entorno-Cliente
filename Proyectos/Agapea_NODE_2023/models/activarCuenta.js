@@ -1,3 +1,3 @@
-module.exports = function (_idCuenta){
+module.exports = function (){
     console.log("HEMOS ENTRADO AL METODO");
 }
