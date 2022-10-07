@@ -13,5 +13,7 @@ router.route('/Registro')
         .get( ClienteController.registroget )
         .post( ClienteController.registropost );
 
+/*router.route('/ActivarCuenta')
+        .get(ClienteController.activarcuentaget);*/
 
 module.exports=router;

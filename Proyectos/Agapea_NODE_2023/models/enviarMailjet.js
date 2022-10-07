@@ -1,5 +1,5 @@
 const Mailjet = require('node-mailjet');
-function MandarMailJet(emailCliente) {
+module.exports = function (emailCliente,subject,cuerpoMail) {
     const mailjet = Mailjet.apiConnect(process.env.MJ_APIKEY_PUBLIC, process.env.MJ_APIKEY_PRIVATE);
     const request = mailjet
         .post("send", {
@@ -15,9 +15,8 @@ function MandarMailJet(emailCliente) {
                     "Email": emailCliente,
                     "Name": "prueba envio"
                 }],
-                "Subject": "Your email flight plan!",
-                "TextPart": "Dear passenger 1, welcome to Mailjet! May the delivery force be with you!",
-                "HTMLPart": "<h3>Dear passenger 1, welcome to <a href=\"https://www.mailjet.com/\">Mailjet</a>!</h3><br />May the delivery force be with you!"
+                "Subject": subject,
+                "HTMLPart": cuerpoMail
             }]
         });
     request
@@ -29,4 +28,4 @@ function MandarMailJet(emailCliente) {
         });
 }
 
-module.exports.MandarMailJet = MandarMailJet; 
+//module.exports.MandarMailJet = MandarMailJet; 
