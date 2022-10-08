@@ -17,10 +17,11 @@ module.exports = {
     },
     loginpost: async (req, res, next) => {
         try {
+            console.log('datos mandados por el usuario', req.body);
             //1º comprobar credenciales usando el email y la password recibidos en el req.body
             var _cuenta = await Cuenta.findOne({ email: req.body.email });
 
-            if (bcryptjs.compare(req.body.password, _cuenta.password)) {
+            if (bcryptjs.compareSync(req.body.password, _cuenta.password)) {
 
                 if(!_cuenta.cuentaActiva) throw  new Error ({  number:1 , message: 'cuenta inactiva' });
                 //2º meter en estado de sesion el objeto cliente q tiene esas credenciales
@@ -53,7 +54,7 @@ module.exports = {
 
         //console.log('mongoose password' + _cuentaFind.password);
         //console.log('la otra' + req.body.password);
-        //console.log('daros mandados por el usuario', req.body);
+        //console.log('datos mandados por el usuario', req.body);
 
     },
     registroget: (req, res, next) => {
@@ -121,7 +122,7 @@ module.exports = {
 
             var _viewdata = { layout: null };
             // /^.*validation failed.*/.test(error.message) ? _viewdata.errores=error.errors: _viewdata.errorServer='* Ha habido un error interno del servidor';
-
+            
             if (/^.*validation failed.*/.test(error.message)) {
                 _viewdata.errores = error.errors //es un objeto js: { login: {.... message: '......'},email: {'......'}}
             }
@@ -145,20 +146,15 @@ module.exports = {
 
         try {
             var _idCuenta = req.params.id; //<--- nombre del parametro en la ruta en fichero routinCliente.js
-            if (res.status(200)) {
-                //metodoActivarCuenta(_id);
-                const filter = { _id: _idCuenta };
-                const update = { cuentaActiva: true };
+            const filter = { _id: _idCuenta };
+            const update = { cuentaActiva: true };
 
-                // `doc` is the document _after_ `update` was applied because of
-                // `new: true`
-                var _resultUpdate = await Cuenta.findOneAndUpdate(filter, update);
+            var _resultUpdate = await Cuenta.findOneAndUpdate(filter, update);
 
-                console.log('resultado del update en coleccion cuentas de mongodb', _resultUpdate);
+            console.log('resultado del update en coleccion cuentas de mongodb', _resultUpdate);
 
-                res.status(200).redirect('http://localhost:3000/Cliente/Login');
+            res.status(200).redirect('http://localhost:3000/Cliente/Login');
 
-            }
         } catch (error) {
             //error en el update...volver a mandar email y redirigir al registro OK
             console.log('errores en el update coleccion cuentas: ', error);

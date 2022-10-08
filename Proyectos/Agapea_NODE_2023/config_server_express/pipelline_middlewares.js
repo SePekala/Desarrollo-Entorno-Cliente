@@ -54,8 +54,8 @@ module.exports=function(servidorExpres){
                                 //json con opciones de configuracion de  handlebars
                                 extname:'hbs',
                                 defaultLayout:'__Layout',
-                                layoutsDir: __dirname + '../views/shared/Layouts',
-                                partialsDir: __dirname + '../views/shared/Partials',
+                                layoutsDir: __dirname + '/../views/shared/Layouts',
+                                partialsDir: __dirname + '/../views/shared/Partials',
                                 helpers: { } //funciones javascript q pueden ser invocadas desde una vista handlebars
                             }
                           ).engine
