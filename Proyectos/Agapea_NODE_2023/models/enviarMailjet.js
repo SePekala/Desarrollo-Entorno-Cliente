@@ -1,6 +1,6 @@
 const Mailjet = require('node-mailjet');
-module.exports = function (emailCliente,subject,cuerpoMail) {
-    const mailjet = Mailjet.apiConnect(process.env.MJ_APIKEY_PUBLIC, process.env.MJ_APIKEY_PRIVATE);
+module.exports = function (emailCliente,nombre,subject,cuerpoMail) {
+    const mailjet = Mailjet.apiConnect(process.env.API_KEY_MAILJET, process.env.SECRET_KEY_MAILJET);
     const request = mailjet
         .post("send", {
             'version': 'v3.1'
@@ -13,7 +13,7 @@ module.exports = function (emailCliente,subject,cuerpoMail) {
                 },
                 "To": [{
                     "Email": emailCliente,
-                    "Name": "prueba envio"
+                    "Name": nombre
                 }],
                 "Subject": subject,
                 "HTMLPart": cuerpoMail

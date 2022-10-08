@@ -1,0 +1,177 @@
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h2>Mi perfil</h2>
+            <div></div><!--sangria-->
+            <div class="alert alert-secondary" data-bs-toggle="collapse" href="#collapseDatos">Datos de perfil</div>          
+            <div class="collapse" id="collapseDatos">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="row text-muted">Correo electrónico</div>
+                        <div class="row"><input type="text" id="inputEmail" class="input-group-text" style="width:90%" /></div>
+                        <div class="row text-muted">Contraseña</div>
+                        <div class="row"><input type="password" id="inputPass" class="input-group-text" style="width:90%" /></div>
+                        <div class="row text-muted">Nombre</div>
+                        <div class="row"><input type="text" id="inputNombre" class="input-group-text" style="width:90%" /></div>
+
+                    </div>
+
+                    <div class="col-sm-6">
+                        <div class="row text-muted">Teléfono</div>
+                        <div class="row"><input type="text" id="inputTlfn" class="input-group-text" style="width:90%" /></div>
+                        <div class="row text-muted">Repetir la contraseña</div>
+                        <div class="row"><input type="password" id="inputPassRep" class="input-group-text" style="width:90%" /></div>
+                        <div class="row text-muted">Apellidos</div>
+                        <div class="row"><input type="text" id="inputNombre" class="input-group-text" style="width:90% " /></div>
+
+                    </div>
+                </div>
+                <div class="row"><span></span></div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="text-muted">Foto</div>
+                        <div id="avatarPerfil" class="card" style="width:200px;height:250px; background-color:aliceblue">
+                            <img src="" />
+                        </div>
+                        <button type="button" class="btn btn-link btn-sm">+ Sube una foto</button>
+                    </div>
+                    <div class="col-sm-8">
+                        <div class="row text-muted">Usuario</div>
+                        <div class="row"><input type="text" id="inputUsuario" class="input-group-sm" /></div>
+                        <div class="row text-muted">Genero</div>
+                        <div class="row">
+                            <select class="form-select" aria-label="Elige genero">
+                                <option selected>Elige genero</option>
+
+                                <option value="H">Hombre</option>
+                                <option value="M">Mujer</option>
+                            </select>
+                        </div>
+                        <div class="row text-muted">Fecha de nacimiento</div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <select name="dia" id="dia" class="form-select">
+                                    <option>Elige día</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-4">
+                                <select name="mes" id="mes" class="form-select">
+                                    <option>Elige mes</option>
+
+                                </select>
+                            </div>
+                            <div class="col-sm-4">
+                                <select name="mes" id="mes" class="form-select">
+                                    <option value="" selected="">Elige año</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row text-muted">Descripcion</div>
+                        <div class="row"><textarea id="textArea"></textarea> </div>
+                        <div class="ro2 align-text-top"><a href=""> Darme de baja</a></div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-secondary" data-bs-toggle="collapse" href="#collapseDirecciones">Direcciones</div>
+            <div class="collapse" id="collapseDirecciones">
+                <div>
+                    <p> Guarda todas tus direcciones de envío y elige la que usarás por defecto donde llegarán tus pedidos.</p>
+
+                   <p> Estas son las direcciones a las que puedes hacer tus envíos. Las direcciones de envío serán las que elijas mientras que la
+                        facturación será la misma en todas las direcciones:
+                    </p>
+                </div>
+
+                <!-- Button trigger modal -->
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                  + Nueva Direccion
+                </button>
+
+                <!-- Modal -->
+                <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Modal title</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                            <div class="container">
+                                <div class="row"><h3><strong>Nueva Direccion</strong></h3></div>
+                                <hr>
+                                <div class="row">
+                                    <p>Si desea que enviemos el pedido a una dirección distinta de la de facturación, modifique los campos a </p>
+                                    <p>continuación según proceda.</p>
+                                </div>
+                                <div class="row">
+                                    <!-- formulario de alta de direcciones -->
+                                    <form class="row g-3">
+
+                                      <div class="col-12">
+                                        <label for="inputAddress" class="form-label">Direccion de Envio:</label>
+                                        <input type="text" class="form-control" id="inputAddress" placeholder="Mi Direccion">
+                                      </div>
+
+                                      <div class="col-6">
+                                        <label for="inputCP" class="form-label">Codigo Postal:</label>
+                                        <input type="text" class="form-control" id="inputCP" placeholder="Codigo Postal: 28803">
+                                      </div>
+                                      <div class="col-6">
+                                        <label for="inputPais" class="form-label">Pais:</label>
+                                        <input type="text" class="form-control" id="inputPais" placeholder="España">
+                                      </div>
+                                      
+                                      
+                                      <div class="col-6">
+                                        <label for="inputProvincia" class="form-label">Provincia:</label>
+                                        <select id="inputProvincia" class="form-select">
+                                          <option value="0" selected> - Seleccionar Provincia - </option>
+                                        </select>
+                                      </div>
+                                      <div class="col-6">
+                                        <label for="inputMunicipio" class="form-label">Municipio:</label>
+                                        <select id="inputState" class="form-select" disabled>
+                                          <option value="0" selected> - Selecciona un Municipio -</option>
+                                        </select>
+                                      </div>
+
+
+                                      <div class="col-12">
+                                        <button type="submit" class="btn btn-primary">Crear Direccion</button>
+                                      </div>
+                                    </form>
+                                </div>
+                            </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Understood</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div> 
+
+<script>
+    //evento CHANGE sobre el select PROVINCIA para hacer una peticion AJAX al servicio externo y recuperar los municipios de esa provincia
+    //https://apiv1.geoapi.es/municipios? CPRO=xxxx & type=JSON & key= & sandbox=1
+    /*
+    $('#inputProvincia').change(
+                function(ev){
+                    var _cpro=ev.target.value;
+                    if(_cpro != "0"){ //se ha seleccionado opcion difererente a - Seleccciona Provincia - 
+                        //haces pet.Ajax, recibes el resultado un JSON y en su prop .data esta el array de objetos JSON de tipo Municipio
+                        //te recorres ese array y con jquery añades un option al select municipio 
+
+                    }                    
+                }
+    );
+    */
+</script>

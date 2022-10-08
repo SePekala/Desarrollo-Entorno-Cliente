@@ -29,6 +29,12 @@
         </div>
         <div class="col-5 bg-light p-4 border">
 
+            {{#if errorMessagge}}
+                <div>
+                    <p><span class="text-danger">{{errorMessagge}}</span></p>
+                </div>
+            {{/if}}
+
             <form method="post" action="http://localhost:3000/Cliente/Login">
                 <h4>Identifícate con:</h4>
 
