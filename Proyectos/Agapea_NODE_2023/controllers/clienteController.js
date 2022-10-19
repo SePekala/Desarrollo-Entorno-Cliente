@@ -7,7 +7,6 @@ var Cliente = require('../models/cliente');
 var Cuenta = require('../models/cuenta');
 
 var MandarMail = require('../models/enviarMailjet');
-var metodoActivarCuenta = require('../models/activarCuenta');
 
 module.exports = {
     loginget: (req, res, next) => {
@@ -23,17 +22,24 @@ module.exports = {
 
             if (bcryptjs.compareSync(req.body.password, _cuenta.password)) {
 
-                if(!_cuenta.cuentaActiva) throw  new Error ({  number:1 , message: 'cuenta inactiva' });
+                if (!_cuenta.cuentaActiva) throw new Error({ number: 1, message: 'cuenta inactiva' });
                 //2º meter en estado de sesion el objeto cliente q tiene esas credenciales
-                var _cliente = await Cliente.findOne({ cuenta: _cuenta._id }); //<--OJO!! antes de almacenar los datos del cliente en la sesion
-                                                                               //expandir props: direcciones,pedidos, cuenta y crear pedidoActual
-                if(!_cliente) throw  new Error ({  number:2 , message: 'esa cuenta no existe en cliente' });
+                var _cliente = await Cliente.findOne({ cuenta: _cuenta._id })
+                    .populate(
+                        [
+                            { path: 'cuenta', model: 'Cuenta' }
+                            // { path: 'direcciones', model: 'Direccion'},
+                            // { path: 'pedidos', model: 'Pedido'}
+                        ]
+                    ); //<--OJO!! antes de almacenar los datos del cliente en la sesion
+                //expandir props: direcciones,pedidos, cuenta y crear pedidoActual
+                if (!_cliente) throw new Error({ number: 2, message: 'esa cuenta no existe en cliente' });
                 req.session.datoscliente = _cliente;
                 //3º redireccionar a InicioPanel
                 res.status(200).redirect('http://localhost:3000/Cliente/InicioPanel');
             }
             else {
-                throw  new Error ({  number:3 , message: 'password invalida' });
+                throw new Error({ number: 3, message: 'password invalida' });
             }
         } catch (error) {
             //errores de password o email invalidos o cuenta no activada...
@@ -43,13 +49,13 @@ module.exports = {
                 case 1:
                     //mandar de nuevo email de activacion y redirigir a vista de q se le ha mandado un nuevo email...
                     break;
-            
+
                 default:
-                    error.message= '*Email o Contraseña incorrectos, intentelo de nuevo';
+                    error.message = '*Email o Contraseña incorrectos, intentelo de nuevo';
 
                     break;
             }
-            res.status(200).render('Cliente/Login.hbs', {layout:null, errorMessagge: error.message});
+            res.status(200).render('Cliente/Login.hbs', { layout: null, errorMessagge: error.message });
         }
 
         //console.log('mongoose password' + _cuentaFind.password);
@@ -78,7 +84,7 @@ module.exports = {
             //---------------------------------------------------------------------------------------------------------------
             //---------------habria q comprobar si ya existe un email dado de alta con ese valor en la coleccion cuentas-----
             //---------------------------------------------------------------------------------------------------------------
-            
+
             //---------------------------------------------------------------------------------------------------------------
             var _cuentaCliente = await new Cuenta(
                 {
@@ -122,7 +128,7 @@ module.exports = {
 
             var _viewdata = { layout: null };
             // /^.*validation failed.*/.test(error.message) ? _viewdata.errores=error.errors: _viewdata.errorServer='* Ha habido un error interno del servidor';
-            
+
             if (/^.*validation failed.*/.test(error.message)) {
                 _viewdata.errores = error.errors //es un objeto js: { login: {.... message: '......'},email: {'......'}}
             }
@@ -164,12 +170,43 @@ module.exports = {
     iniciopanelget: async (req, res, next) => {
 
         //tengo que pasar objeto cliente recuperado del estado de sesion y el layout del panel cliente
-        res.status(200).render(
-            'Cliente/InicioPanel.hbs', { layout: '__LayoutPanelCliente.hbs' }
+        res.status(200).render('Cliente/InicioPanel.hbs',
+            {
+                layout: '__LayoutPanelCliente.hbs',
+                cliente: req.session.datoscliente,
+                dias: Array.from({ length: 31 }, (el, pos) => pos + 1),
+                meses: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                anios: Array.from({ length: new Date(Date.now()).getFullYear() - 1933 }, (el, pos) => pos + 1934)
+
+            }
         );
     },
-    iniciopanelpost: async (req, res, next) => {
+    updateDatosCliente: async (req, res, next) => {
 
+        try {
+            console.log(req.body);
+
+            var _fechanac;
+            if (req.body.dia != 0 && req.body.mes != 0 && req.body.anio != 0) _fechanac = new Date(req.body.anio, req.body.mes, req.body.dia);
+            if (password != '' && password == repassword) {
+                //update de cuenta...
+                var _resultUpdateCuenta = await Cuenta.findOneAndUpdate(
+                    { _id: req.session.datoscliente.cuenta._id },
+                    { login: req.body.login, password: req.body.password }
+                );
+                console.log(_resultUpdateCuenta);
+            }
+
+            var _nuevoCliente = new Cliente({ ...req.body })
+            
+
+            // modificar las props. del objeto cliente que hay en el estado de sesion con los valores pasados en el formulario
+            // volcarlos en mongodb en la coleccion clientes y cuentas(si la password no esta en blanco)
+            // VOLVER A ACTUALIZAR ESTADO DE SESSION con los datos del cliente modificados...
+        } catch (error) {
+
+        }
+        
     }
 
 }

@@ -15,8 +15,8 @@ router.route('/Registro')
 
 router.get('/ActivarCuenta/:id' ,ClienteController.activarcuentaget);
 
-router.route('/InicioPanel')
-        .get( ClienteController.iniciopanelget )
-        .post( ClienteController.iniciopanelpost );
+router.get('/InicioPanel', ClienteController.iniciopanelget );
+
+router.post('/UpdateDatosCliente',ClienteController.updateDatosCliente);
 
 module.exports=router;
