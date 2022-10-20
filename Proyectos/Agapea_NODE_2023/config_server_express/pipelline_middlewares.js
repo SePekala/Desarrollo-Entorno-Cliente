@@ -56,7 +56,9 @@ module.exports=function(servidorExpres){
                                 defaultLayout:'__Layout',
                                 layoutsDir: __dirname + '/../views/shared/Layouts',
                                 partialsDir: __dirname + '/../views/shared/Partials',
-                                helpers: { } //funciones javascript q pueden ser invocadas desde una vista handlebars
+                                helpers: {
+                                   
+                                } //funciones javascript q pueden ser invocadas desde una vista handlebars
                             }
                           ).engine
                           ); 

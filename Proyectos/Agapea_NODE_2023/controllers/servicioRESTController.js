@@ -31,6 +31,12 @@ module.exports={
             res.status(200).send( {codigo:1,mensaje:'Fallo interno en el servidor, intentalo mas tarde'} );
         }
 
+    },
+    uploadimagenFichero: async (req,res,next) => {
+        console.log('...recibiendo imagen del cliente....', req.body);
+        //ahora en coleccion cuentas de mongo en propiedad imagenAvatar almaceno el nombre del fichero, no su contenido...
+        res.status(200).send({codigo:0,mensaje:'Imagen almacenada ok en server...'});
+
     }
 
 }

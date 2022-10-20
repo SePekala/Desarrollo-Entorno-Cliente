@@ -54,7 +54,7 @@
                   placeholder="{{cliente.cuenta.login}}" /></div>
               <div class="row text-muted">Genero</div>
               <div class="row">
-                <select class="form-select" aria-label="Elige genero" name="genero">
+                <select class="form-select" aria-label="Elige genero" id="genero" name="genero">
                   <option selected>Elige genero</option>
 
                   <option value="Hombre">Hombre</option>
@@ -75,7 +75,7 @@
                   <select name="mes" id="mes" class="form-select">
                     <option value="0" selected>Elige mes</option>
                     {{#each meses}}
-                      <option value="{{this}}">{{this}}</option>
+                      <option value="{{@index}}">{{this}}</option>
                     {{/each}}
 
                   </select>
@@ -208,16 +208,31 @@
               }
   );
   */
+  //---------------------- para mostrar la fecha de nacimiento del cliente en los select -----------------------
+  // dos formas
+  //    - accediendo desde javascript a variables pasadas a la vista
+  //          var _fecha="{{ cliente.fechaNacimiento }}"
+  //    - definiendo un helper personalizado seleccionaOption
+
 
   //---------------------- seleccion imagen avatar cliente redimensionado y subida contenido en base64 al server por ajax---------
   //$('#selectorImagen').change(
 
+  console.log("{{cliente.fechaNacimiento}}");
+  var fechaNac=new Date("{{cliente.fechaNacimiento}}");
+  $(`#dia > option[value=${fechaNac.getDay()}]`).attr('selected','true');
+  $(`#mes > option[value=${fechaNac.getMonth()}]`).attr('selected','true');
+  $(`#anio > option[value=${fechaNac.getFullYear()}]`).attr('selected','true');
+  $(`#genero > option[value="${genero}"]`).attr('selected','true');
+
+  //---------------------- seleccion imagen avatar cliente redimensionado y subida contenido en base64 al server por ajax---------
+/*
+
   var nuevoContenido = ""; //contenido reducido en base64 de la imagen avatar de usuario...
 
   function muestraRespuestaServer(resp) {
-    $('#mensajeRespuesta').append(`<p><span class="text-danger">${resp.mensaje}</span></p>`);
+    $('#mensajeRespuesta').html(`<p><span class="text-danger">${resp.mensaje}</span></p>`);
   }
-
   document.getElementById('selectorImagen').addEventListener('change',
     function (ev) {
       var fichSeleccionado = ev.target.files[0]; //fichero seleccionaado por el cliente...
@@ -262,7 +277,54 @@
           (errores) => { console.log(errores); muestraRespuestaServer(errores); }
         );
     }
-  );//subida de imagen al server....
+  );//subida de imagen al server....*/
 
-    //---------------------- seleccion imagen avatar cliente redimensionado y subida del fichero en MULTIPART-FORM-DATA --------
+  //---------------------- seleccion imagen avatar cliente redimensionado y subida del fichero en MULTIPART-FORM-DATA --------
+  var fichSeleccionado;
+
+  function muestraRespuestaServer(resp) {
+    $('#mensajeRespuesta').html(`<p><span class="text-danger">${resp.mensaje}</span></p>`);
+  }
+  document.getElementById('selectorImagen').addEventListener('change',
+    function(ev){
+      fichSeleccionado=ev.target.files[0]; //fichero seleccionado por el cliente...
+      var reader=new FileReader();
+
+      reader.addEventListener('load', function(evt){
+            $('#imagenUsuario').attr('src',evt.target.result);
+            $('#botonUploadImagen').removeAttr('disabled');
+        }
+      );//evento LOAD del objeto FileReader para leer el contenido del fichero imagen...
+      reader.readAsDataURL(fichSeleccionado);//empiezo a leer el contenido de la imagen
+    }
+  ); //cierro el evento change del input-file
+
+  $('#botonUploadImagen').click(
+      function (ev) {
+        //deshabilitar el boton antes, para evitar q el cliente haga clicks a tope
+        $('#botonUploadImagen').attr('disabled', 'true');
+        var datos=new FormData();
+        datos.append('fichimagen', fichSeleccionado);
+
+        console.log(datos);
+
+        $.ajax(
+          {
+            url: 'http://localhost:3000/api/uploadImagenFichero',
+            method: 'POST',
+            data: datos,
+            processData: false,
+            contentType: false
+          }
+        )
+        .done(
+          (respuesta) => { console.log(respuesta); muestraRespuestaServer(respuesta); }
+        )
+        .fail(
+          (errores) => { console.log(errores); muestraRespuestaServer(errores); }
+        );
+      }
+  );//subida de imagen al server....*/
+
+
 </script>
