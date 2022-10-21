@@ -33,9 +33,29 @@ module.exports={
 
     },
     uploadimagenFichero: async (req,res,next) => {
-        console.log('...recibiendo imagen del cliente....', req.body);
-        //ahora en coleccion cuentas de mongo en propiedad imagenAvatar almaceno el nombre del fichero, no su contenido...
-        res.status(200).send({codigo:0,mensaje:'Imagen almacenada ok en server...'});
+        try {
+            //con req.file tienes acceso al fichero original...no hace falta crearse variable intermedia en req
+            console.log('...recibiendo imagen del cliente....', req.body);
+            console.log('lo q vale req.ficheroImagen',req.ficheroImagen);
+
+            //ahora en coleccion cuentas de mongo en propiedad imagenAvatar almaceno el nombre del fichero, no su contenido...
+            var resultUpdate = await Cuenta.updateOne({_id: req.session.datoscliente.cuenta._id}, { imagenAvatar: req.ficheroImagen});
+            console.log(resultUpdate);
+            console.log('id que estoy cogiendo',req.session.datoscliente.cuenta._id);
+            console.log('====================================================== la img',req.ficheroImagen)
+
+            res.status(200).send(
+                {
+                    codigo:0,
+                    mensaje:'Imagen almacenada ok en server...', 
+                    otrosdatos: req.ficheroImagen
+                }
+            );
+            
+        } catch (error) {
+            res.status(200).send({codigo:1,mensaje:'fallo al subir imagen al servidor...' + error.message});
+
+        }
 
     }
 

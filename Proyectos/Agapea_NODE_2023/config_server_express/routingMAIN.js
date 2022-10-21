@@ -8,5 +8,6 @@ module.exports=function(servidorExpress){
 
     servidorExpress.use('/Cliente', routingCliente);
     servidorExpress.use('/api', routingRest);
+    
 
 }

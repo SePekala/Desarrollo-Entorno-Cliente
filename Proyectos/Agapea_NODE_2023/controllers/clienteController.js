@@ -2,6 +2,7 @@
 //var mailjet=require('node-mailjet');
 var mongoose = require('mongoose');
 var bcryptjs = require('bcryptjs');
+var axios=require('axios').default;
 
 var Cliente = require('../models/cliente');
 var Cuenta = require('../models/cuenta');
@@ -170,43 +171,101 @@ module.exports = {
     iniciopanelget: async (req, res, next) => {
 
         //tengo que pasar objeto cliente recuperado del estado de sesion y el layout del panel cliente
-        res.status(200).render('Cliente/InicioPanel.hbs',
+        // NECESITO RECUPERAR LAS PROVIMCIAS HACIENDO UN PET.AL SERVICIO net
+        var _respRest={};
+
+        try {
+            _respRest=await axios.get('https://apiv1.geoapi.es/provincias?type=JSON&key=&sandbox=1'); //json formato: {update_time:'', size:xx,data[]}
+            console.log('datos recibidos...', _respRest);
+
+        } catch (error) {
+            console.log('error en peticion rest a la hora de obtener provincias...', error);
+            _respRest={ data:[]};
+        }
+        finally
+        {
+            res.status(200).render('Cliente/InicioPanel.hbs',
             {
                 layout: '__LayoutPanelCliente.hbs',
                 cliente: req.session.datoscliente,
                 dias: Array.from({ length: 31 }, (el, pos) => pos + 1),
                 meses: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-                anios: Array.from({ length: new Date(Date.now()).getFullYear() - 1933 }, (el, pos) => pos + 1934)
-
+                anios: Array.from({ length: new Date(Date.now()).getFullYear() - 1933 }, (el, pos) => pos + 1934),
+                provincias: _respRest.data.data
             }
-        );
+            );
+        }
+        
     },
     updateDatosCliente: async (req, res, next) => {
 
         try {
-            console.log(req.body);
-
-            var _fechanac;
-            if (req.body.dia != 0 && req.body.mes != 0 && req.body.anio != 0) _fechanac = new Date(req.body.anio, req.body.mes, req.body.dia);
-            if (password != '' && password == repassword) {
-                //update de cuenta...
-                var _resultUpdateCuenta = await Cuenta.findOneAndUpdate(
-                    { _id: req.session.datoscliente.cuenta._id },
-                    { login: req.body.login, password: req.body.password }
-                );
-                console.log(_resultUpdateCuenta);
-            }
-
-            var _nuevoCliente = new Cliente({ ...req.body })
-            
-
             // modificar las props. del objeto cliente que hay en el estado de sesion con los valores pasados en el formulario
             // volcarlos en mongodb en la coleccion clientes y cuentas(si la password no esta en blanco)
             // VOLVER A ACTUALIZAR ESTADO DE SESSION con los datos del cliente modificados...
-        } catch (error) {
+            console.log(req.body);
 
+            var _fechanac;
+            var _datoscliente=req.session.datoscliente;
+            var camposcuenta=[]; //<---- en este array almaceno las props. del modelo Cuenta q quiero modificar
+            var camposcliente=[]; //<---- en este array almaceno las props. del modelo Cliente q quiero modificar
+
+            //req.body={nombre:'....',apellidos:'....',password:'....',repassword:'....',genero:'....',login:'....',dia:'....',mes:'....',anio:'....',descipcion:'....'}
+            var {dia,mes,anio,password,repassword,login, ...cliente}=req.body;
+
+            if (req.body.dia != -1 && req.body.mes != -1 && req.body.anio != -1) _fechanac = new Date(anio, mes, req.body.dia);
+            if (password == repassword) camposcuenta.push('password');
+            if (login != _datoscliente.cuenta.login) camposcuenta.push('login');
+            if(camposcuenta.length != 0){
+                //tengo q modificar cuenta...
+                //update de cuenta...
+                var _resultUpdateCuenta = await Cuenta.findOneAndUpdate(
+                    { _id: req.session.datoscliente.cuenta._id },
+                    { login: login, password: bcryptjs.hashSync(password) },
+                    { new: true, runValidators: true, fields: camposcuenta }
+                );
+
+                console.log(_resultUpdateCuenta);
+            }
+
+            // me tengo que recorrer el objeto "cliente" creado a partir del req.body, propiedad por propiedad comparandolo
+            // con el objeto cliente q tengo la sesion y la prop. q haya cambiado la meto en el array camposcliente
+            cliente.fechaNacimiento=_fechanac;
+
+            //Object.keys(cliente).forEach((prop) => cliente[prop] != _datoscliente[prop] ? (camposcliente.push(prop), _datoscliente[prop]=cliente[prop]) : false)
+            
+            Object.keys(cliente).forEach(
+                (prop) => {
+                    if(cliente[prop] != _datoscliente[prop]) //_datoscliente[prop] es lo mismo que _datoscliente.prop
+                    {
+                        
+                        camposcliente.push(prop); // almaceno en el array de props cliente a modificar esa prop
+                        _datoscliente[prop]=cliente[prop]; // actualizo el obj cliente q estaba en la sesion con el nuevo valor, para almacenar despues
+                    }
+                }
+            );
+
+            if(camposcliente.length != 0){
+                var _resultUpdateCliente=await Cliente.findOneAndUpdate(
+                    { _id: _datoscliente._id },
+                    cliente,
+                    { new:true, runValidators: true, fields: camposcliente }
+                );
+            console.log(_resultUpdateCliente);
+
+            }
+
+            req.session.datoscliente=_datoscliente;
+            res.status(200).redirect('http://localhost:3000/Cliente/InicioPanel');
+           
+        } catch (error) {
+            console.log('error al modificar datos cliente/cuenta.....', error);
+            res.status(200).redirect('http://localhost:3000/Cliente/InicioPanel');
         }
         
+    },
+    operaDireccion: async (req,res,next) => {
+        console.log(req.body);
     }
 
 }

@@ -42,7 +42,7 @@
               <div id="avatarPerfil" class="card" style="width:200px;height:250px; background-color:aliceblue">
                 <input type="file" accept="image/*" id="selectorImagen" name="imagen" style="visibility: hidden;" />
                 <a onclick="javascript: $('#selectorImagen').click()">
-                  <img id="imagenUsuario" style="width:200px;height:250px;" src="{{cliente.cuenta.imagenAvatar}}" />
+                  <img id="imagenUsuario" style="width:200px;height:250px;" src="http://localhost:3000/public/uploads_imagenes/{{cliente.cuenta.imagenAvatar}}" />
                 </a>
               </div>
               <button type="button" id="botonUploadImagen" class="btn btn-link btn-sm" disabled>+ Sube una foto</button>
@@ -65,7 +65,7 @@
               <div class="row">
                 <div class="col-sm-4">
                   <select name="dia" id="dia" class="form-select">
-                    <option value="0" selected>Elige día</option>
+                    <option value="-1" selected>Elige día</option>
                     {{#each dias}}
                       <option value="{{this}}">{{this}}</option>
                     {{/each}}
@@ -73,7 +73,7 @@
                 </div>
                 <div class="col-sm-4">
                   <select name="mes" id="mes" class="form-select">
-                    <option value="0" selected>Elige mes</option>
+                    <option value="-1" selected>Elige mes</option>
                     {{#each meses}}
                       <option value="{{@index}}">{{this}}</option>
                     {{/each}}
@@ -82,7 +82,7 @@
                 </div>
                 <div class="col-sm-4">
                   <select name="anio" id="anio" class="form-select">
-                    <option value="0" selected>Elige año</option>
+                    <option value="-1" selected>Elige año</option>
                     {{#each anios}}
                       <option value="{{this}}">{{this}}</option>
                     {{/each}}
@@ -141,33 +141,36 @@
                   </div>
                   <div class="row">
                     <!-- formulario de alta de direcciones -->
-                    <form class="row g-3">
+                    <form method="post" action="http://localhost/Cliente/OperaDireccion" class="row g-3">
 
                       <div class="col-12">
                         <label for="inputAddress" class="form-label">Direccion de Envio:</label>
-                        <input type="text" class="form-control" id="inputAddress" placeholder="Mi Direccion">
+                        <input type="text" class="form-control" id="inputAddress" placeholder="Mi Direccion" name="direccion">
                       </div>
 
                       <div class="col-6">
                         <label for="inputCP" class="form-label">Codigo Postal:</label>
-                        <input type="text" class="form-control" id="inputCP" placeholder="Codigo Postal: 28803">
+                        <input type="text" class="form-control" id="inputCP" placeholder="Codigo Postal: 28803" name="cp">
                       </div>
                       <div class="col-6">
                         <label for="inputPais" class="form-label">Pais:</label>
-                        <input type="text" class="form-control" id="inputPais" placeholder="España">
+                        <input type="text" class="form-control" id="inputPais" placeholder="España" name="pais">
                       </div>
 
 
                       <div class="col-6">
                         <label for="inputProvincia" class="form-label">Provincia:</label>
-                        <select id="inputProvincia" class="form-select">
-                          <option value="0" selected> - Seleccionar Provincia - </option>
+                        <select id="inputProvincia" class="form-select" name="provincia">
+                          <option value="-1" selected> - Seleccionar Provincia - </option>
+                          {{#each provincias}}
+                                  <option value="{{this.CPRO}}-{{this.PRO}}">{{this.PRO}}</option>
+                          {{/each}}
                         </select>
                       </div>
                       <div class="col-6">
                         <label for="inputMunicipio" class="form-label">Municipio:</label>
-                        <select id="inputState" class="form-select" disabled>
-                          <option value="0" selected> - Selecciona un Municipio -</option>
+                        <select id="inputState" class="form-select" name="municipio" disabled>
+                          <option value="-1" selected> - Selecciona un Municipio -</option>
                         </select>
                       </div>
 
@@ -178,10 +181,6 @@
                     </form>
                   </div>
                 </div>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Understood</button>
               </div>
             </div>
           </div>
@@ -195,19 +194,46 @@
 
 <script>
   //evento CHANGE sobre el select PROVINCIA para hacer una peticion AJAX al servicio externo y recuperar los municipios de esa provincia
-  //https://apiv1.geoapi.es/municipios? CPRO=xxxx & type=JSON & key= & sandbox=1
-  /*
+  
   $('#inputProvincia').change(
               function(ev){
                   var _cpro=ev.target.value;
-                  if(_cpro != "0"){ //se ha seleccionado opcion difererente a - Seleccciona Provincia - 
+                  if(_cpro != "0"){ 
+                      //se ha seleccionado opcion difererente a - Seleccciona Provincia - 
                       //haces pet.Ajax, recibes el resultado un JSON y en su prop .data esta el array de objetos JSON de tipo Municipio
+                      //https://apiv1.geoapi.es/municipios? CPRO=xxxx & type=JSON & key= & sandbox=1
                       //te recorres ese array y con jquery añades un option al select municipio 
+                      $('#inputMunicipio').removeAttr('disabled');
+
+                      var _petAjax=new XMLHttpRequest();
+                      _petAjax.open('GET', `https://apiv1.geoapi.es/municipios? CPRO=${_cpro} & type=JSON & key= & sandbox=1`);
+                      _petAjax.addEventListener('readystatechange',function(evajax)
+                      {
+                          if(_petAjax.readyState==4 && _petAjax.status==200){
+                              var _respREST=JSON.parse(_petAjax.responseText);
+
+                            //VACIAR LOS OPTION PRECARGADOS... en variable nodo se carga cada option del select inputMunicipios
+                            Array.from(document.getElementById('inputMunicipio').children)
+                                 .forEach(nodo => {document.getElementById('inputMunicipio').remove(nodo) } );
+
+                            document.getElementById('inputMunicipio').append('<option value="-1"> -SELECCIONA UN MUNICIPIO- </option>');  
+
+                            _respREST.data.forEach(
+                                (muni) => {
+                                  var option=document.createElement('option');
+                                  option.setAttribute('value',muni-CMUM + '-' + muni.DMUN50);
+                                  option.append(document.createTextNode(muni.DMUN50));
+
+                                  document.getElementById('inputMunicipio').append(option);
+                                }
+                            );
+                          }
+                      });
 
                   }                    
               }
   );
-  */
+  
   //---------------------- para mostrar la fecha de nacimiento del cliente en los select -----------------------
   // dos formas
   //    - accediendo desde javascript a variables pasadas a la vista
@@ -318,7 +344,11 @@
           }
         )
         .done(
-          (respuesta) => { console.log(respuesta); muestraRespuestaServer(respuesta); }
+          (respuesta) => { 
+              console.log(respuesta); 
+              muestraRespuestaServer(respuesta); 
+              $('#imagenUsuario').attr('src','http://localhost:3000/public/uploads_imagenes/' + respuesta.otrosdatos);
+          }
         )
         .fail(
           (errores) => { console.log(errores); muestraRespuestaServer(errores); }

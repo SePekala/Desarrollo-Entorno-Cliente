@@ -19,4 +19,6 @@ router.get('/InicioPanel', ClienteController.iniciopanelget );
 
 router.post('/UpdateDatosCliente',ClienteController.updateDatosCliente);
 
+router.post('/OperaDireccion', ClienteController.operaDireccion);
+
 module.exports=router;

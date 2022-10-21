@@ -7,10 +7,11 @@ var uploadmiddleware=multer(
     {
         storage: multer.diskStorage(
             {
-                destination: (req,file,callback)=> callback(null, __dirname + '/../uploads_imagenes/'),
+                destination: (req,file,callback)=> callback(null, __dirname + '/../public/uploads_imagenes/'),
                 filename: (req,file,callback)=> {
                     console.log('File vale...',file);
                     var nombreImagen=`${file.originalname.split('.')[0]} - ${req.session.datoscliente._id.toString()}.${file.originalname.split('.')[1]}`;
+                    req.ficheroImagen=nombreImagen;
                     callback(null, nombreImagen);
                 }
             }
@@ -18,9 +19,10 @@ var uploadmiddleware=multer(
     }
 );
 
+
 var servicioRESTController=require('../controllers/servicioRESTController');
 
 router.post('/uploadImagen', servicioRESTController.uploadimagen);
-router.post('/uploadImagenFichero', uploadmiddleware.single('fichimagen') ,servicioRESTController.uploadimagenFichero);
+router.post('/uploadImagenFichero', uploadmiddleware.single('fichimagen'), servicioRESTController.uploadimagenFichero);
 
 module.exports=router;
