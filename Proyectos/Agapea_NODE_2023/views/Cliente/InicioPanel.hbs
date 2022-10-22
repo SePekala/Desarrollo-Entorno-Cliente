@@ -42,7 +42,8 @@
               <div id="avatarPerfil" class="card" style="width:200px;height:250px; background-color:aliceblue">
                 <input type="file" accept="image/*" id="selectorImagen" name="imagen" style="visibility: hidden;" />
                 <a onclick="javascript: $('#selectorImagen').click()">
-                  <img id="imagenUsuario" style="width:200px;height:250px;" src="http://localhost:3000/public/uploads_imagenes/{{cliente.cuenta.imagenAvatar}}" />
+                  <img id="imagenUsuario" style="width:200px;height:250px;"
+                    src="http://localhost:3000/public/uploads_imagenes/{{cliente.cuenta.imagenAvatar}}" />
                 </a>
               </div>
               <button type="button" id="botonUploadImagen" class="btn btn-link btn-sm" disabled>+ Sube una foto</button>
@@ -67,7 +68,7 @@
                   <select name="dia" id="dia" class="form-select">
                     <option value="-1" selected>Elige día</option>
                     {{#each dias}}
-                      <option value="{{this}}">{{this}}</option>
+                    <option value="{{this}}">{{this}}</option>
                     {{/each}}
                   </select>
                 </div>
@@ -75,7 +76,7 @@
                   <select name="mes" id="mes" class="form-select">
                     <option value="-1" selected>Elige mes</option>
                     {{#each meses}}
-                      <option value="{{@index}}">{{this}}</option>
+                    <option value="{{@index}}">{{this}}</option>
                     {{/each}}
 
                   </select>
@@ -84,7 +85,7 @@
                   <select name="anio" id="anio" class="form-select">
                     <option value="-1" selected>Elige año</option>
                     {{#each anios}}
-                      <option value="{{this}}">{{this}}</option>
+                    <option value="{{this}}">{{this}}</option>
                     {{/each}}
                   </select>
                 </div>
@@ -145,12 +146,14 @@
 
                       <div class="col-12">
                         <label for="inputAddress" class="form-label">Direccion de Envio:</label>
-                        <input type="text" class="form-control" id="inputAddress" placeholder="Mi Direccion" name="direccion">
+                        <input type="text" class="form-control" id="inputAddress" placeholder="Mi Direccion"
+                          name="direccion">
                       </div>
 
                       <div class="col-6">
                         <label for="inputCP" class="form-label">Codigo Postal:</label>
-                        <input type="text" class="form-control" id="inputCP" placeholder="Codigo Postal: 28803" name="cp">
+                        <input type="text" class="form-control" id="inputCP" placeholder="Codigo Postal: 28803"
+                          name="cp">
                       </div>
                       <div class="col-6">
                         <label for="inputPais" class="form-label">Pais:</label>
@@ -163,13 +166,13 @@
                         <select id="inputProvincia" class="form-select" name="provincia">
                           <option value="-1" selected> - Seleccionar Provincia - </option>
                           {{#each provincias}}
-                                  <option value="{{this.CPRO}}-{{this.PRO}}">{{this.PRO}}</option>
+                          <option value="{{this.CPRO}}-{{this.PRO}}">{{this.PRO}}</option>
                           {{/each}}
                         </select>
                       </div>
                       <div class="col-6">
                         <label for="inputMunicipio" class="form-label">Municipio:</label>
-                        <select id="inputState" class="form-select" name="municipio" disabled>
+                        <select id="inputMunicipio" class="form-select" name="municipio" disabled>
                           <option value="-1" selected> - Selecciona un Municipio -</option>
                         </select>
                       </div>
@@ -194,46 +197,45 @@
 
 <script>
   //evento CHANGE sobre el select PROVINCIA para hacer una peticion AJAX al servicio externo y recuperar los municipios de esa provincia
-  
+
   $('#inputProvincia').change(
-              function(ev){
-                  var _cpro=ev.target.value;
-                  if(_cpro != "0"){ 
-                      //se ha seleccionado opcion difererente a - Seleccciona Provincia - 
-                      //haces pet.Ajax, recibes el resultado un JSON y en su prop .data esta el array de objetos JSON de tipo Municipio
-                      //https://apiv1.geoapi.es/municipios? CPRO=xxxx & type=JSON & key= & sandbox=1
-                      //te recorres ese array y con jquery añades un option al select municipio 
-                      $('#inputMunicipio').removeAttr('disabled');
+    function (ev) {
+      var _cpro = ev.target.value.split('-')[0];
+      if (_cpro != "0") {
+        //se ha seleccionado opcion difererente a - Seleccciona Provincia - 
+        //haces pet.Ajax, recibes el resultado un JSON y en su prop .data esta el array de objetos JSON de tipo Municipio
+        //https://apiv1.geoapi.es/municipios?CPRO=xxxx&type=JSON&key=&sandbox=1
+        //te recorres ese array y con jquery añades un option al select municipio 
+        $('#inputMunicipio').removeAttr('disabled');
 
-                      var _petAjax=new XMLHttpRequest();
-                      _petAjax.open('GET', `https://apiv1.geoapi.es/municipios? CPRO=${_cpro} & type=JSON & key= & sandbox=1`);
-                      _petAjax.addEventListener('readystatechange',function(evajax)
-                      {
-                          if(_petAjax.readyState==4 && _petAjax.status==200){
-                              var _respREST=JSON.parse(_petAjax.responseText);
+        var _petAjax = new XMLHttpRequest();
+        _petAjax.open('GET', `https://apiv1.geoapi.es/municipios?CPRO=${_cpro}&type=JSON&key=&sandbox=1`);
+        _petAjax.addEventListener('readystatechange', function (evajax) {
+          if (_petAjax.readyState == 4 && _petAjax.status == 200) {
+            var _respREST = JSON.parse(_petAjax.responseText);
+            //VACIAR LOS OPTION PRECARGADOS... en variable nodo se carga cada option del select inputMunicipios
+            Array.from(document.getElementById('inputMunicipio').children)
+              .forEach(nodo => { document.getElementById('inputMunicipio').remove(nodo) });
 
-                            //VACIAR LOS OPTION PRECARGADOS... en variable nodo se carga cada option del select inputMunicipios
-                            Array.from(document.getElementById('inputMunicipio').children)
-                                 .forEach(nodo => {document.getElementById('inputMunicipio').remove(nodo) } );
+            document.getElementById('inputMunicipio').append('<option value="-1"> -SELECCIONA UN MUNICIPIO- </option>');
 
-                            document.getElementById('inputMunicipio').append('<option value="-1"> -SELECCIONA UN MUNICIPIO- </option>');  
+            _respREST.data.forEach(
+              (muni) => {
+                var option = document.createElement('option');
+                option.setAttribute('value', muni.CMUN + '-' + muni.DMUN50);
+                option.append(document.createTextNode(muni.DMUN50));
 
-                            _respREST.data.forEach(
-                                (muni) => {
-                                  var option=document.createElement('option');
-                                  option.setAttribute('value',muni-CMUM + '-' + muni.DMUN50);
-                                  option.append(document.createTextNode(muni.DMUN50));
-
-                                  document.getElementById('inputMunicipio').append(option);
-                                }
-                            );
-                          }
-                      });
-
-                  }                    
+                document.getElementById('inputMunicipio').append(option);
               }
+            );
+          }
+        });
+        _petAjax.send();
+
+      }
+    }
   );
-  
+
   //---------------------- para mostrar la fecha de nacimiento del cliente en los select -----------------------
   // dos formas
   //    - accediendo desde javascript a variables pasadas a la vista
@@ -245,65 +247,65 @@
   //$('#selectorImagen').change(
 
   console.log("{{cliente.fechaNacimiento}}");
-  var fechaNac=new Date("{{cliente.fechaNacimiento}}");
-  $(`#dia > option[value=${fechaNac.getDay()}]`).attr('selected','true');
-  $(`#mes > option[value=${fechaNac.getMonth()}]`).attr('selected','true');
-  $(`#anio > option[value=${fechaNac.getFullYear()}]`).attr('selected','true');
-  $(`#genero > option[value="${genero}"]`).attr('selected','true');
+  var fechaNac = new Date("{{cliente.fechaNacimiento}}");
+  $(`#dia > option[value=${fechaNac.getDay()}]`).attr('selected', 'true');
+  $(`#mes > option[value=${fechaNac.getMonth()}]`).attr('selected', 'true');
+  $(`#anio > option[value=${fechaNac.getFullYear()}]`).attr('selected', 'true');
+  $(`#genero > option[value="${genero}"]`).attr('selected', 'true');
 
   //---------------------- seleccion imagen avatar cliente redimensionado y subida contenido en base64 al server por ajax---------
-/*
-
-  var nuevoContenido = ""; //contenido reducido en base64 de la imagen avatar de usuario...
-
-  function muestraRespuestaServer(resp) {
-    $('#mensajeRespuesta').html(`<p><span class="text-danger">${resp.mensaje}</span></p>`);
-  }
-  document.getElementById('selectorImagen').addEventListener('change',
-    function (ev) {
-      var fichSeleccionado = ev.target.files[0]; //fichero seleccionaado por el cliente...
-      var reader = new FileReader();
-
-      reader.addEventListener('load', function (evt) {
-        var contenido = evt.target.result;
-        console.log(contenido);
-        //redimensionamos la imagen antes de mostrarla
-        var canvas = document.createElement('canvas');
-        var contexto = canvas.getContext('2d');
-
-        $('#imagenUsuario').attr('src', contenido);
-        document.getElementById('imagenUsuario').addEventListener('load', //con jquery peta ¿?
-          function (evimg) {
-            contexto.drawImage(document.getElementById('imagenUsuario'), 0, 0, 200, 250);
-            nuevoContenido = canvas.toDataURL(fichSeleccionado.type);
-            console.log('contenido del fichero imagen reducido...', nuevoContenido);
-            //$('#imagenUsuario').attr('src', nuevoContenido);
-
-            $('#botonUploadImagen').removeAttr('disabled');
-
-          }
-        ); //cuando se produce la carga de la imagen, es cuando redimensiono usando el canvas
-
-      }); // leyendo del fichero imagen en evento load del obj FILEREADER
-
-      reader.readAsDataURL(fichSeleccionado); //empiezo a leer el contenido de la imagen
-    });
-
-  $('#botonUploadImagen').click(
-    function (ev) {
-      //deshabilitar el boton antes, para evitar q el cliente haga clicks a tope
-      $('#botonUploadImagen').attr('disabled', 'true');
-
-      console.log('...a subir imagen por ajax a node js....');
-      $.post('http://localhost:3000/api/uploadImagen', { fichero: nuevoContenido })
-        .done(
-          (respuesta) => { console.log(respuesta); muestraRespuestaServer(respuesta); }
-        )
-        .fail(
-          (errores) => { console.log(errores); muestraRespuestaServer(errores); }
-        );
+  /*
+  
+    var nuevoContenido = ""; //contenido reducido en base64 de la imagen avatar de usuario...
+  
+    function muestraRespuestaServer(resp) {
+      $('#mensajeRespuesta').html(`<p><span class="text-danger">${resp.mensaje}</span></p>`);
     }
-  );//subida de imagen al server....*/
+    document.getElementById('selectorImagen').addEventListener('change',
+      function (ev) {
+        var fichSeleccionado = ev.target.files[0]; //fichero seleccionaado por el cliente...
+        var reader = new FileReader();
+  
+        reader.addEventListener('load', function (evt) {
+          var contenido = evt.target.result;
+          console.log(contenido);
+          //redimensionamos la imagen antes de mostrarla
+          var canvas = document.createElement('canvas');
+          var contexto = canvas.getContext('2d');
+  
+          $('#imagenUsuario').attr('src', contenido);
+          document.getElementById('imagenUsuario').addEventListener('load', //con jquery peta ¿?
+            function (evimg) {
+              contexto.drawImage(document.getElementById('imagenUsuario'), 0, 0, 200, 250);
+              nuevoContenido = canvas.toDataURL(fichSeleccionado.type);
+              console.log('contenido del fichero imagen reducido...', nuevoContenido);
+              //$('#imagenUsuario').attr('src', nuevoContenido);
+  
+              $('#botonUploadImagen').removeAttr('disabled');
+  
+            }
+          ); //cuando se produce la carga de la imagen, es cuando redimensiono usando el canvas
+  
+        }); // leyendo del fichero imagen en evento load del obj FILEREADER
+  
+        reader.readAsDataURL(fichSeleccionado); //empiezo a leer el contenido de la imagen
+      });
+  
+    $('#botonUploadImagen').click(
+      function (ev) {
+        //deshabilitar el boton antes, para evitar q el cliente haga clicks a tope
+        $('#botonUploadImagen').attr('disabled', 'true');
+  
+        console.log('...a subir imagen por ajax a node js....');
+        $.post('http://localhost:3000/api/uploadImagen', { fichero: nuevoContenido })
+          .done(
+            (respuesta) => { console.log(respuesta); muestraRespuestaServer(respuesta); }
+          )
+          .fail(
+            (errores) => { console.log(errores); muestraRespuestaServer(errores); }
+          );
+      }
+    );//subida de imagen al server....*/
 
   //---------------------- seleccion imagen avatar cliente redimensionado y subida del fichero en MULTIPART-FORM-DATA --------
   var fichSeleccionado;
@@ -312,48 +314,48 @@
     $('#mensajeRespuesta').html(`<p><span class="text-danger">${resp.mensaje}</span></p>`);
   }
   document.getElementById('selectorImagen').addEventListener('change',
-    function(ev){
-      fichSeleccionado=ev.target.files[0]; //fichero seleccionado por el cliente...
-      var reader=new FileReader();
+    function (ev) {
+      fichSeleccionado = ev.target.files[0]; //fichero seleccionado por el cliente...
+      var reader = new FileReader();
 
-      reader.addEventListener('load', function(evt){
-            $('#imagenUsuario').attr('src',evt.target.result);
-            $('#botonUploadImagen').removeAttr('disabled');
-        }
+      reader.addEventListener('load', function (evt) {
+        $('#imagenUsuario').attr('src', evt.target.result);
+        $('#botonUploadImagen').removeAttr('disabled');
+      }
       );//evento LOAD del objeto FileReader para leer el contenido del fichero imagen...
       reader.readAsDataURL(fichSeleccionado);//empiezo a leer el contenido de la imagen
     }
   ); //cierro el evento change del input-file
 
   $('#botonUploadImagen').click(
-      function (ev) {
-        //deshabilitar el boton antes, para evitar q el cliente haga clicks a tope
-        $('#botonUploadImagen').attr('disabled', 'true');
-        var datos=new FormData();
-        datos.append('fichimagen', fichSeleccionado);
+    function (ev) {
+      //deshabilitar el boton antes, para evitar q el cliente haga clicks a tope
+      $('#botonUploadImagen').attr('disabled', 'true');
+      var datos = new FormData();
+      datos.append('fichimagen', fichSeleccionado);
 
-        console.log(datos);
+      console.log(datos);
 
-        $.ajax(
-          {
-            url: 'http://localhost:3000/api/uploadImagenFichero',
-            method: 'POST',
-            data: datos,
-            processData: false,
-            contentType: false
-          }
-        )
+      $.ajax(
+        {
+          url: 'http://localhost:3000/api/uploadImagenFichero',
+          method: 'POST',
+          data: datos,
+          processData: false,
+          contentType: false
+        }
+      )
         .done(
-          (respuesta) => { 
-              console.log(respuesta); 
-              muestraRespuestaServer(respuesta); 
-              $('#imagenUsuario').attr('src','http://localhost:3000/public/uploads_imagenes/' + respuesta.otrosdatos);
+          (respuesta) => {
+            console.log(respuesta);
+            muestraRespuestaServer(respuesta);
+            $('#imagenUsuario').attr('src', 'http://localhost:3000/public/uploads_imagenes/' + respuesta.otrosdatos);
           }
         )
         .fail(
           (errores) => { console.log(errores); muestraRespuestaServer(errores); }
         );
-      }
+    }
   );//subida de imagen al server....*/
 
 

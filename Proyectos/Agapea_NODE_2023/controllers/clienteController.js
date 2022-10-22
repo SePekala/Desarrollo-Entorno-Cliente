@@ -2,7 +2,7 @@
 //var mailjet=require('node-mailjet');
 var mongoose = require('mongoose');
 var bcryptjs = require('bcryptjs');
-var axios=require('axios').default;
+var axios=require('axios');
 
 var Cliente = require('../models/cliente');
 var Cuenta = require('../models/cuenta');
@@ -171,11 +171,12 @@ module.exports = {
     iniciopanelget: async (req, res, next) => {
 
         //tengo que pasar objeto cliente recuperado del estado de sesion y el layout del panel cliente
-        // NECESITO RECUPERAR LAS PROVIMCIAS HACIENDO UN PET.AL SERVICIO net
+        // NECESITO RECUPERAR LAS PROVINCIAS HACIENDO UN PET.AL SERVICIO net
         var _respRest={};
 
         try {
-            _respRest=await axios.get('https://apiv1.geoapi.es/provincias?type=JSON&key=&sandbox=1'); //json formato: {update_time:'', size:xx,data[]}
+
+            var _respRest=await axios.get('https://apiv1.geoapi.es/provincias?type=JSON&key=&sandbox=1'); //json formato: {update_time:'', size:xx,data[]}
             console.log('datos recibidos...', _respRest);
 
         } catch (error) {
