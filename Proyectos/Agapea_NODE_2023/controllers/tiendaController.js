@@ -1,18 +1,28 @@
 var Categoria=require('../models/categoria');
 var Libro=require('../models/libro');
 
-var _listaCatPrincipal=[];
-Categoria.find( {idCategoria: { $regex: { } }} )
-    .then(categs=> _listaCatPrincipal=categs)
-    .catch(error => console.log('error al obtener categorias principakes...', error));
+
+async function recuperaCats(){
+    try {
+        var _listaCatPpales=await Categoria.find({IdCategoria: {$regex: /^[0-9]{1,}$/} }).lean();
+        console.log(_listaCatPpales);
+
+        return _listaCatPpales;
+
+    } catch (error) {
+        console.log('error al obtener categorias ppales...', error);
+        return [];
+    }
+
+}
 
 module.exports={
-    recuperalibros: async (req,res,next)=>{
+    recuperaLibros: async (req,res,next)=>{
         res.status(200).render('Tienda/Libros.hbs',
                                 { 
                                     layout: '__Layout.hbs', 
-                                    categorias: _listaCatPrincipal, 
-                                    cliente: res.session.datoscliente
+                                    categorias: await recuperaCats(),
+                                    cliente: req.session.datoscliente
                                 }
                             );
     }

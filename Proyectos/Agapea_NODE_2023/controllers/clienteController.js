@@ -271,7 +271,6 @@ module.exports = {
         try {
             console.log(req.body); //campos del formulario: calle,cp,pais,provincia,municipio,operacion
             var{operacion,provincia,municipio, ...direc}=req.body;
-            console.log('la variablem=====================================',...direc);
             var _cliente=req.session.datoscliente; //<---------- datos de sesion cliente
 
             var _session=await mongoose.connection.startSession();
@@ -310,7 +309,7 @@ module.exports = {
                     var _idDireccion=operacion.split('_')[1];
 
                     var _updateDireccion = await Direccion.findByIdAndUpdate(
-                        { _id: _idDirec},
+                        { _id: _idDireccion},
                         { $set: 
                             {
                             provincia: { CPRO: provincia.split('-')[0], PRO: provincia.split('-')[1]},

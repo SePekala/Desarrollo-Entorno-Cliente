@@ -147,12 +147,12 @@
                   </div>
                   <div class="row">
                     <!-- formulario de alta de direcciones -->
-                    <form method="post" action="http://localhost:3000/Cliente/OperaDireccion" class="row g-3">
+                    <form method="post" id="formDirecciones" action="http://localhost:3000/Cliente/OperaDireccion" class="row g-3">
 
                       <div class="col-12">
-                        <label for="inputAddress" class="form-label">Direccion de Envio:</label>
-                        <input type="text" class="form-control" id="inputAddress" placeholder="Mi Direccion"
-                          name="direccion">
+                        <label for="inputCalle" class="form-label">Direccion de Envio:</label>
+                        <input type="text" class="form-control" id="inputCalle" placeholder="Mi Direccion"
+                          name="calle">
                       </div>
 
                       <div class="col-6">
@@ -212,7 +212,7 @@
 
             //tengo q acceder al modelo de la vista Cliente q el servidor nos ha mapeado, desde javascript
             //para recuperar de la lista de direcciones el objeto Direccion asociado a ese _idDireccion
-            var _listaDirecciones = '{{{json cliente.direcciones}}}';
+            var _listaDirecciones = JSON.parse('{{{json cliente.direcciones}}}');
             console.log('la lista de direcciones vale...', _listaDirecciones);
 
             var _direccionEditar = _listaDirecciones.filter((el, pos, arr) => el._id == _idDireccion)[0];
@@ -230,7 +230,7 @@
             //esto funciona si en el nombre de la provincia no apareciesen caracteres aleatorios "_"
             //$('#inputProvincia').val(_direccionEditar.provincia.cpro + "-" + _direccionEditar.pro);
             //busco el <option cuyo value sea "cpro-...." y pongo el attributo selected a true
-            $(`#inputProvincia > option[value^=${_direccionEditar.provinciaDirecc.cpro}]`).attr('selected', 'true');
+            $(`#inputProvincia > option[value^=${_direccionEditar.provincia.CPRO}]`).attr('selected', 'true');
 
             //disparo evento change mmanualmente sobre el select provincias para q me carge municipios (con jquery kaska)
             document.getElementById('inputProvincia').dispatchEvent(new Event('change'));
@@ -240,7 +240,7 @@
             //busco el <option cuyo value sea "cmum-...." y pongo el attributo selected a true
             //OJO!!! hay q dar tiempo a q se recuperen municipios del servicio antes de seleccionar...
 
-            setTimeout(() => $(`#inputMunicipio > option[value^=${_direccionEditar.localidadDirecc.cmum}]`).attr('selected', 'true'), 5000);
+            setTimeout(() => $(`#inputMunicipio > option[value^=${_direccionEditar.municipio.CMUM}]`).attr('selected', 'true'), 5000);
 
             //a ACTUALIZAR DIRECCION y cambio el hidden
             $('#btnCrearDireccion').text('ACTUALIZAR DIRECCION');
@@ -285,7 +285,7 @@
             _respREST.data.forEach(
               (muni) => {
                 var option = document.createElement('option');
-                option.setAttribute('value', muni.CMUN + '-' + muni.DMUN50);
+                option.setAttribute('value', muni.CMUM + '-' + muni.DMUN50);
                 option.append(document.createTextNode(muni.DMUN50));
 
                 document.getElementById('inputMunicipio').append(option);

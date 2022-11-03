@@ -7,4 +7,4 @@ var categoriaSchema=mongoose.Schema(
     }
 );
 
-module.exports=mongoose('Categoria', categoriaSchema, 'categorias');
+module.exports=mongoose.model('Categoria', categoriaSchema, 'categorias');

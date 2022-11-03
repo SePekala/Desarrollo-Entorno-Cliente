@@ -21,4 +21,4 @@ var libroSchema=mongoose.Schema(
     }
 );
 
-module.exports=mongoose('Libro', categoriaSchema, 'libros');
+module.exports=mongoose.model('Libro', libroSchema, 'libros');

@@ -1,6 +1,6 @@
 var mongoose=require('mongoose');
 
-var direccionSchema=mongoose.Schema(
+var direccionSchema=new mongoose.Schema(
     {
         calle: {type:String ,required:[true, '* calle requerida']},
         pais: {type:String ,default:'España'},
