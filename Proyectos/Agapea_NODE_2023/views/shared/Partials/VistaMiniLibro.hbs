@@ -1,0 +1,24 @@
+<!-- minivista para representar los datos de un objeto libro, con su imagen en miniatura, titulo,... y un boton comprar -->
+
+<div class="card mb-3" style="max-width: 540px;">
+    <div class="row g-0">
+        <div class="col-md-4">
+            <a href="http://localhost:3000/Tienda/MostrarDetallesLibro?isbn13={{isbn13}}">
+                <img src="{{imagenLibroBASE64}}" class="img-fluid rounded-start">
+            </a>
+            <a class="btn btn-primary btn-sm" href="http://localhost:3000/Pedido/AddLibroPedido/{{isbn13}}"> 
+                COMPRAR
+            </a>
+            
+        </div>
+        <div class="col-md-8">
+            <div class="card-body">
+                <h5 class="card-title"><a  href="http://localhost:3000/Tienda/MostrarDetallesLibro?isbn13={{isbn13}}">{{titulo}}</a></h5>
+                <p class="card-text">{{autores}}</p>
+                <p class="card-text">{{editorial}}</p>
+                <p class="card-text"><small class="text-muted">{{numeroPaginas}}</small></p>
+                <p class="card-text"><strong>{{precio}} €</strong></p>
+            </div>
+        </div>
+    </div>
+</div> 

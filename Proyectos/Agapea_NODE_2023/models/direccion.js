@@ -1,37 +1,25 @@
 var mongoose=require('mongoose');
-const clienteController = require('../controllers/clienteController');
 
 var direccionSchema=mongoose.Schema(
     {
-        /*
-        public String IdDireccion { get; set; }
-        public String Calle { get; set; }
-        public String Numero { get; set; }
-        public String Edificio { get; set; }
-        public String piso { get; set; }
-        public String Letra { get; set; }
-        public int CP { get; set; }
-        public Muncipio LocalidadDirecc { get; set; }
-        public Provincia ProvinciaDirecc { get; set; }
-        public String Pais { get; set; } = "España";
-        */
-
-        calle: {type:String ,default:''},
-        numero: {type:Number ,default:''},
-        edificio: {type:String ,default:''},
-        piso: {type:String ,default:''},
-        letra: {type:String ,default:''},
-        codigoPostal: {type:Number ,default:''},
-        municipio:[
-            { type: mongoose.Schema.Types.ObjectId, ref: 'Munipio' }
-        ],
-        provincias:[
-            { type: moongose.Schema.Types.ObjectId, ref: 'Provincia' }
-        ],
-
-        pais: {type:String ,default:''}
+        calle: {type:String ,required:[true, '* calle requerida']},
+        pais: {type:String ,default:'España'},
+        cp: {type:Number ,required:[true, '* cp requerido'], match:[ /^[0-9]{5}$/, '* formato invalido: 1235']},
+        provincia:{
+            CPRO: {type: String, required: true},
+            PRO: {type: String, required: true},
+            CCOM: {type: String, default:''}
+        },
+        municipio:{
+            CPRO: {type: String, required: true},
+            CMUM: {type: String, required: true},
+            DMUN50: {type: String, required: true},
+            CUN: {type: String, default:''}
+        },
+        esPrincipal: {type:Boolean ,default:false},
+        esFacturacion: {type:Boolean ,default:false}
 
     }
 )
 
-module.exports=mongoose.model('Cliente',direccionSchema,'direcciones')
+module.exports=mongoose.model('Direccion',direccionSchema,'direcciones')

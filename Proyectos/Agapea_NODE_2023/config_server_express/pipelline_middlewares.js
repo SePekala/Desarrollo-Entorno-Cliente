@@ -57,7 +57,9 @@ module.exports=function(servidorExpres){
                                 layoutsDir: __dirname + '/../views/shared/Layouts',
                                 partialsDir: __dirname + '/../views/shared/Partials',
                                 helpers: {
-                                   
+                                   json: function (valorASerializar) {
+                                        return JSON.stringify(valorASerializar);
+                                   }
                                 } //funciones javascript q pueden ser invocadas desde una vista handlebars
                             }
                           ).engine

@@ -1,0 +1,12 @@
+<!--Vista que recibe como objeto contexto un modelo direccion-->
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">{{calle}}</h5>
+        <h6 class="card-subtitle mb-2 text-muted">{{_id}}</h6>
+
+        <p class="card-text">CP: {{cp}}, Municipio: {{municipio.DMUN50}} , Provincia: {{provincia.PRO}} , Pais: {{pais}}</p>
+
+        <button class="btn btn-outline-primary btn-sm" id="btnEditarDireccion_{{_id}}">Editar Dirección</button>
+        <button class="btn btn-outline-danger btn-sm" id="btnEliminarDireccion_{{_id}}">Eliminar Dirección</button>
+    </div>
+</div> 

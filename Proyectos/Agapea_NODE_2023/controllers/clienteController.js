@@ -6,6 +6,7 @@ var axios=require('axios');
 
 var Cliente = require('../models/cliente');
 var Cuenta = require('../models/cuenta');
+var Direccion = require('../models/direccion');
 
 var MandarMail = require('../models/enviarMailjet');
 
@@ -28,12 +29,13 @@ module.exports = {
                 var _cliente = await Cliente.findOne({ cuenta: _cuenta._id })
                     .populate(
                         [
-                            { path: 'cuenta', model: 'Cuenta' }
-                            // { path: 'direcciones', model: 'Direccion'},
+                            { path: 'cuenta', model: 'Cuenta' },
+                            { path: 'direcciones', model: 'Direccion'}
                             // { path: 'pedidos', model: 'Pedido'}
                         ]
                     ); //<--OJO!! antes de almacenar los datos del cliente en la sesion
                 //expandir props: direcciones,pedidos, cuenta y crear pedidoActual
+
                 if (!_cliente) throw new Error({ number: 2, message: 'esa cuenta no existe en cliente' });
                 req.session.datoscliente = _cliente;
                 //3º redireccionar a InicioPanel
@@ -266,7 +268,86 @@ module.exports = {
         
     },
     operaDireccion: async (req,res,next) => {
-        console.log(req.body);
+        try {
+            console.log(req.body); //campos del formulario: calle,cp,pais,provincia,municipio,operacion
+            var{operacion,provincia,municipio, ...direc}=req.body;
+            console.log('la variablem=====================================',...direc);
+            var _cliente=req.session.datoscliente; //<---------- datos de sesion cliente
+
+            var _session=await mongoose.connection.startSession();
+            await _session.startTransaction();
+
+            switch (operacion.split('_')[0]) {
+                case 'crear':
+                    //1º insertar datos en nueva direccion en coleccion direcciones
+                    var _idDirec=new mongoose.Types.ObjectId();
+                    var _insertDirecc=await new Direccion(
+                        {
+                            _id: _idDirec,
+                            provincia: { CPRO: provincia.split('-')[0], PRO: provincia.split('-')[1]},
+                            municipio: { CPRO: provincia.split('-')[0], CMUM: municipio.split('-')[0], DMUN50: municipio.split('-')[1]},
+                            ...direc
+                        }
+                    ).save({ session : _session});
+
+                    console.log('resultado insert en coleccion direcciones...', _insertDirecc);
+                    //2º actualizar coleccion clientes con el _id del cliente en variable de sesion la prop.direcciones y
+                    //añadir al array el nuevo _id de la direccion creada
+                    var _updateClientes=await Cliente.findByIdAndUpdate({ _id: _cliente._id }, {$push: { direcciones: _idDirec } }).session(_session);
+                    console.log('resultado update en coleccion clientes...', _updateClientes);
+
+                    await _session.commitTransaction();
+
+                    //3º modificar la variable de sesion datoscliente añadiendo direccion nueva a prop.direcciones
+                    _cliente.direcciones.push(_insertDirecc);
+                    req.session.datoscliente=_cliente;
+
+                    //4º redireccionar a InicioPanel
+                    break;
+            
+                case 'modificar':
+                    //1º modificar datos de la direccion con el _id Direccion pasado en la variable "operacion"
+                    var _idDireccion=operacion.split('_')[1];
+
+                    var _updateDireccion = await Direccion.findByIdAndUpdate(
+                        { _id: _idDirec},
+                        { $set: 
+                            {
+                            provincia: { CPRO: provincia.split('-')[0], PRO: provincia.split('-')[1]},
+                            municipio: { CPRO: provincia.split('-')[0], CMUM: municipio.split('-')[0], DMUN50: municipio.split('-')[1]},
+                            ...direc
+                            }
+                        },
+                        { new: true}
+                    );
+                    //2º modificar variable de sesion datoscliente la direccion modificada de prop. direcciones
+                    var _posDirec = _cliente.direcciones.findIndex( direc => direc._id == _idDireccion);
+                    _cliente.direcciones[_posDirec]=_updateDireccion;
+
+                    req.session.datoscliente=_cliente;
+
+                    //3º redireccionar a InicioPanel
+                    break;
+
+                case 'borrar':
+                    //1º borrar datos de la direccion con el _id Direccion pasado en la variable "operacion"
+                    var _idDireccion=operacion.split('_')[1];
+                    var _deleteDireccion=await Direccion.findByIdAndDelete({ _id: _idDireccion });
+                    console.log('resiltado del borrado de la direccion...', _deleteDireccion);
+
+                    //2º modificar variable de sesion datoscliente eliminando la direccion borrada
+                    _cliente.direcciones=_cliente.direcciones.filter( el => el.id != _idDireccion);
+                    req.session.datoscliente=_cliente;
+
+                    //3º redireccionar a InicioPanel
+                    
+                    break;
+            }
+            res.status(200).redirect('http://localhost:3000/Cliente/InicioPanel');
+        } catch (error) {
+            console.log(error);
+            await _session.abortTransaction();
+        }
     }
 
 }

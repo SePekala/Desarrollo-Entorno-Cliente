@@ -114,6 +114,11 @@
             facturación será la misma en todas las direcciones:
           </p>
         </div>
+        <hr>
+        <!-- listado de direccions del cliente para borrar/modificar -->
+        {{#each cliente.direcciones as |direccion|}}
+            {{>VistaMiniDireccion direccion}}
+        {{/each}}
 
         <!-- Button trigger modal -->
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
@@ -142,7 +147,7 @@
                   </div>
                   <div class="row">
                     <!-- formulario de alta de direcciones -->
-                    <form method="post" action="http://localhost/Cliente/OperaDireccion" class="row g-3">
+                    <form method="post" action="http://localhost:3000/Cliente/OperaDireccion" class="row g-3">
 
                       <div class="col-12">
                         <label for="inputAddress" class="form-label">Direccion de Envio:</label>
@@ -177,10 +182,11 @@
                         </select>
                       </div>
 
-
                       <div class="col-12">
-                        <button type="submit" class="btn btn-primary">Crear Direccion</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" id="btnCrearDireccion">Crear Direccion</button>
                       </div>
+                      <input type="hidden" id="operacion" name="operacion" value="crear_"/>
                     </form>
                   </div>
                 </div>
@@ -196,6 +202,63 @@
 </div>
 
 <script>
+  //#region ...alta,modificacion,borrado de direcciones...
+    //manejadores eventos sobre botones Editar Direccion...
+
+    $('button[id^="btnEditarDireccion_"]').click(
+        function (ev) {
+            //para saber el boton q ha disparado evento: ev.target o con $(this)
+            var _idDireccion = $(this).attr('id').split('_')[1];
+
+            //tengo q acceder al modelo de la vista Cliente q el servidor nos ha mapeado, desde javascript
+            //para recuperar de la lista de direcciones el objeto Direccion asociado a ese _idDireccion
+            var _listaDirecciones = '{{{json cliente.direcciones}}}';
+            console.log('la lista de direcciones vale...', _listaDirecciones);
+
+            var _direccionEditar = _listaDirecciones.filter((el, pos, arr) => el._id == _idDireccion)[0];
+
+            console.log(_direccionEditar);
+
+
+            var _modal = new bootstrap.Modal(document.getElementById('staticBackdrop'));
+            _modal.show();
+
+            //cargar los campos del formulario con los datos del objeto _direccionEditar y cambiar etiqueta del boton del formulario
+            $('#inputCalle').val(_direccionEditar.calle);
+            $('#inputCP').val(_direccionEditar.cp);
+            $('#inputPais').val(_direccionEditar.pais);
+            //esto funciona si en el nombre de la provincia no apareciesen caracteres aleatorios "_"
+            //$('#inputProvincia').val(_direccionEditar.provincia.cpro + "-" + _direccionEditar.pro);
+            //busco el <option cuyo value sea "cpro-...." y pongo el attributo selected a true
+            $(`#inputProvincia > option[value^=${_direccionEditar.provinciaDirecc.cpro}]`).attr('selected', 'true');
+
+            //disparo evento change mmanualmente sobre el select provincias para q me carge municipios (con jquery kaska)
+            document.getElementById('inputProvincia').dispatchEvent(new Event('change'));
+
+            //pasa como en las provincias, si en el nombre de los municipios no apareciesen de forma aleatoria "_" funcionaria esto:
+            //$('#inputMunicpio').val(_direccionEditar.municipìo.cmum + "-" + _direccionEditar.municipio.dmun50);
+            //busco el <option cuyo value sea "cmum-...." y pongo el attributo selected a true
+            //OJO!!! hay q dar tiempo a q se recuperen municipios del servicio antes de seleccionar...
+
+            setTimeout(() => $(`#inputMunicipio > option[value^=${_direccionEditar.localidadDirecc.cmum}]`).attr('selected', 'true'), 5000);
+
+            //a ACTUALIZAR DIRECCION y cambio el hidden
+            $('#btnCrearDireccion').text('ACTUALIZAR DIRECCION');
+
+            $('#operacion').attr('value', 'modificar_' + _idDireccion);
+        }
+    );
+    
+    //manejadores de evento sobre botones borrar direccion
+    $('button[id^="btnEliminarDireccion_"]').click(
+        function(ev){
+            $('#operacion').attr('value', 'borrar_' + $(this).attr('id').split('_')[1]);
+            $('#inputMunicipio').removeAttr('disabled');
+            $('#formDirecciones').submit();
+        }
+    ); 
+  //#endregion
+
   //evento CHANGE sobre el select PROVINCIA para hacer una peticion AJAX al servicio externo y recuperar los municipios de esa provincia
 
   $('#inputProvincia').change(
