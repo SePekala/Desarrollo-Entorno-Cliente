@@ -1,1 +1,14 @@
-<p> AQUI IRAN LOS MINILIBROS....</p>
+<!-- listado de libros -->
+<div class="container">
+    <div class="col-4">
+        {{#if (operar _listalibros.lenght '!=' 0) }}
+            {{#each _listalibros as |unlibro|}}
+                    {{>VistaMiniLibro unlibro}}
+            {{/each}}
+        {{else}}
+            <p><h5><strong>No se han encontrado libros </strong>de esa categoria...</h5></p>
+        {{/if}}
+    </div>
+</div>
+
+

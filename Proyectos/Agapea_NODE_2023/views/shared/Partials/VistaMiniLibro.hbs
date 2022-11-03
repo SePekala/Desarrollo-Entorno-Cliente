@@ -1,24 +1,39 @@
 <!-- minivista para representar los datos de un objeto libro, con su imagen en miniatura, titulo,... y un boton comprar -->
 
-<div class="card mb-3" style="max-width: 540px;">
+<div class="card mb-3" style="max-width: 540px;" id="carLibro_{{ISBN13}}">
     <div class="row g-0">
         <div class="col-md-4">
-            <a href="http://localhost:3000/Tienda/MostrarDetallesLibro?isbn13={{isbn13}}">
-                <img src="{{imagenLibroBASE64}}" class="img-fluid rounded-start">
+            <a href="http://localhost:3000/Tienda/MostrarDetallesLibro?isbn13={{ISBN13}}">
+                <img src="{{ImagenLibroBASE64}}" class="img-fluid rounded-start">
             </a>
-            <a class="btn btn-primary btn-sm" href="http://localhost:3000/Pedido/AddLibroPedido/{{isbn13}}"> 
+            <a class="btn btn-primary btn-sm" href="http://localhost:3000/Pedido/AddLibroPedido/{{ISBN13}}" id="botonComprar_{{ISBN13}}" style="visibility: hidden;"> 
                 COMPRAR
             </a>
             
         </div>
         <div class="col-md-8">
             <div class="card-body">
-                <h5 class="card-title"><a  href="http://localhost:3000/Tienda/MostrarDetallesLibro?isbn13={{isbn13}}">{{titulo}}</a></h5>
-                <p class="card-text">{{autores}}</p>
-                <p class="card-text">{{editorial}}</p>
-                <p class="card-text"><small class="text-muted">{{numeroPaginas}}</small></p>
-                <p class="card-text"><strong>{{precio}} €</strong></p>
+                <h5 class="card-title"><a  href="http://localhost:3000/Tienda/MostrarDetallesLibro?isbn13={{ISBN13}}">{{Titulo}}</a></h5>
+                <p class="card-text">{{Autores}}</p>
+                <p class="card-text">{{Editorial}}</p>
+                <p class="card-text"><small class="text-muted">{{NumeroPaginas}}</small></p>
+                <p class="card-text"><strong>{{Precio}} €</strong></p>
             </div>
         </div>
     </div>
 </div> 
+
+<script>
+    //ocultamos o mostramos boton comprar en funcion de si se pasa el raton sobre div...
+    $('div[id^="carLibro_"]').mouseenter(
+        function (ev){
+                    var _isbn13=$(this).attr('id').split('_')[1];
+                    $(`a[id="botonComprar_${_isbn13}"]`).attr('style','visibility:visible;');
+                }
+    ).mouseleave(
+        function (ev){
+                    var _isbn13=$(this).attr('id').split('_')[1];
+                    $(`a[id="botonComprar_${_isbn13}"]`).attr('style','visibility:hidden;');
+                }
+    )
+</script>

@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/AgapeaDAW.styles.css" asp-append-version="true" />
     <script src="https://kit.fontawesome.com/23c8e300a1.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.1.js" integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI=" crossorigin="anonymous"></script>
     <style>
         .bg-negro{
             background-color: #2c2c2c;
@@ -108,7 +109,7 @@
 
                     <div class="list-group">
                     {{#each categorias as |cat|}}
-                            <a href="#" 
+                            <a href="http://localhost:3000/Tienda/RecuperaLibros/{{cat.IdCategoria}}" 
                               class="list-group-item list-group-item-action border border-end-0 border-start-0 text-dark">
                                     {{cat.NombreCategoria}}
                               </a>
