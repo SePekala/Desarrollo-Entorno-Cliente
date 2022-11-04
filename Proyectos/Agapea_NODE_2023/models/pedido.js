@@ -12,9 +12,9 @@ var pedidoSchema=mongoose.Schema(
                 cantidadElemento:{ type: Number, required: true, default: 1}
             }
         ],
-        subTotalEnvio:{type: Decimal, default: 0},
-        gastosEnvio:{type: Decimal, default: 0},
-        totalPedido:{type: Decimal, default: 0},
+        subTotalPedido:{type: Number, default: 0},
+        gastosEnvio:{type: Number, default: 0},
+        totalPedido:{type: Number, default: 0},
         direccionEnvio:{type: mongoose.Schema.Types.ObjectId, ref_: 'Direccion'},
         direccionFacturacion:{type: mongoose.Schema.Types.ObjectId, ref_: 'Direccion'}
     }

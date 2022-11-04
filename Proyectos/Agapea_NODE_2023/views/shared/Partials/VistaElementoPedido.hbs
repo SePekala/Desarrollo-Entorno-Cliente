@@ -1,0 +1,29 @@
+<!-- recibe como "modelo" un objeto de tipo { libroElemento:{...}, cantidadElemento:xx } -->
+<table class="table table-borderless">
+    <tr>
+        <td rowspan="2"><img src="{{libroElemento.ImagenLibroBASE64}}" style="width: 30px;"/></td>
+        <td><label>{{libroElemento.Titulo}}</label></td>
+        <td>
+            <!--boton eliminar libro-->
+            <a href="http://localhost:3000/Pedido/EliminarLibroPedido/{{libroElemento.ISBN13}}" class="btn btn-light" style="color: red;">
+                <strong>X</strong>
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <!-- boton +, label cantidad, boton - y precio-->
+            <a href="http://localhost:3000/Pedido/RestartCantidadLibro/{{libroElemento.ISBN13}}" class="btn btn-primary btn-sm"> - </a>
+            <label>{{cantidadElemento}}</label>
+
+            <a href="http://localhost:3000/Pedido/SumarCantidadLibro/{{libroElemento.ISBN13}}" class="btn btn-primary btn-sm"> + </a>
+
+            <label> X <span style="color: red;">{{libroElemento.Precio}}€</span></label>
+        </td>
+
+        <td>
+            <!-- subtotal del libro-->
+            <label style="color: red;">{{ operar libroElemento.Precio '*' cantidadElemento }} €</label>
+        </td>
+    </tr>
+</table>

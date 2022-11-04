@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bienvenido a la tienda de libros Agapea.com</title>
+    <script src="https://kit.fontawesome.com/23c8e300a1.js" crossorigin="anonymous"></script>
+    <!-- jquery -->
+    <script src="https://code.jquery.com/jquery-3.6.1.js" integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI=" crossorigin="anonymous"></script>
+    <!-- estilos y estas cosas-->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <!-- columna para direcciones y pago -->
+            <div class="col-8">
+
+            </div>
+            <!-- columna para elementos pedido -->
+            <div class="col-4">
+                <div class="container">
+                    <div class="row">
+                        <h5><strong>Resumen de la cesta</strong></h5>
+                    </div>
+
+                    {{#each cliente.pedidoActual.elementosPedido as |elemento|}}
+                    <div class="row">
+                        {{>VistaElementoPedido elemento}}
+                    </div>
+                    {{/each}}
+                    <hr>
+                    <div class="row">
+                        <div class="col-10"> <p><strong>SubTotal: </strong></p> </div>
+                        <div class="col-2"><span style="color:red;">{{ cliente.pedidoActual.subTotalPedido }} €</span></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-10"> <p><strong>Gastos de envio y gestion: </strong></p> </div>
+                        <div class="col-2"><span style="color:red;">{{ cliente.pedidoActual.gastosEnvio }} €</span></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-10"> <p><strong>Total a pagar: </strong></p> </div>
+                        <div class="col-2"><span style="color:red;">{{ cliente.pedidoActual.totalPedido }} €</span></div>   
+                    </div>
+
+                    <div class="row"><small>El pedido de entrega es de <span style="color: green;">1 a 7 días laborales.</span></small></div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <a href="http://localhost:3000/Tienda/RecuperaLibros" class="btn btn-outline-primaray"><i class="fa-solid fa-book">Seguir Comprando</i></a>
+                        </div>
+
+                         <div class="col-6">
+                            <a href="http://localhost:3000/Tienda/FinalizarPedido" class="btn btn-outline-primaray"><i class="fa-regular fa-truck-fast">Finalizar Pedido</i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

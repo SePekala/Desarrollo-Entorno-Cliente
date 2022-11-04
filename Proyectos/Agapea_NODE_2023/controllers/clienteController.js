@@ -7,6 +7,7 @@ var axios=require('axios');
 var Cliente = require('../models/cliente');
 var Cuenta = require('../models/cuenta');
 var Direccion = require('../models/direccion');
+var Pedido=require('../models/pedido');
 
 var MandarMail = require('../models/enviarMailjet');
 
@@ -37,6 +38,27 @@ module.exports = {
                 //expandir props: direcciones,pedidos, cuenta y crear pedidoActual
 
                 if (!_cliente) throw new Error({ number: 2, message: 'esa cuenta no existe en cliente' });
+
+                //------ nos creamos pedido actual -------
+                var _pedidoActual=new Pedido(
+                    {
+                        _id: new mongoose.Types.ObjectId(),
+                        fechaPedido: Date.now(),
+                        estadoPedido: 'pendiente',
+                        elementosPedido: [], 
+                        gastosEnvio: 2,
+                        subTotalPedido:0,
+                        totalPedido:0,
+                        direccionEnvio: _cliente.direcciones.filter( direc => direc.esPrincipal==true)[0]._id,
+                        direccionFacturacion: _cliente.direcciones.filter( direc => direc.esFacturacion==true)[0]._id
+
+                    }
+                );
+                _cliente.pedidoActual=_pedidoActual; //<---en teoria deberia ir solo el _id, pero como lo quiero para la variable de sesion lo meto expandido todo el objeto pedido
+                                                     //<---en elementosPedido va un array [ {libroElemento: _id, cantidadElemento:x}, {libroElemento: _id, cantidadElemento:x} ..]
+                                                     //pero como no lo voy a almacenar aun en mongo, sino q va a la variable de sesion, en elementosPedido va un array con los libros expandidos
+                                                     //[ {libroElemento: { titulo:.., isbn10:..}, cantidadElemento:xx}], {libroElemento: { titulo:.., isbn10:..}, cantidadElemento:xx}, ...]
+                //----------------------------------------
                 req.session.datoscliente = _cliente;
                 //3º redireccionar a InicioPanel
                 res.status(200).redirect('http://localhost:3000/Cliente/InicioPanel');
