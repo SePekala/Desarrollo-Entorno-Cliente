@@ -3,7 +3,7 @@
 
 var routingCliente=require('./routingCliente');
 var routingTienda=require('./routingTienda');
-var routingPedido=require('./routingPedido');
+// var routingPedido=require('./routingPedido');
 
 var routingRest=require('./routingREST');
 
@@ -11,7 +11,7 @@ module.exports=function(servidorExpress){
 
     servidorExpress.use('/Cliente', routingCliente);
     servidorExpress.use('/Tienda', routingTienda);
-    servidorExpress.use('/Pedido', routingPedido);
+    // servidorExpress.use('/Pedido', routingPedido);
 
     servidorExpress.use('/api', routingRest);
 
