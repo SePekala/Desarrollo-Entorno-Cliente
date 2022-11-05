@@ -6,7 +6,7 @@ function renderizarMostrarPedido(clientesesion,req,res) {
     //actualizar el subtotal y total del pedido
     var _subtotal=0;
 
-    clientesesion.pedidoActual.elementosPedido.subTotalPedido.forEach(element => 
+    clientesesion.pedidoActual.elementosPedido.forEach(element => 
         {
             _subtotal += element.libroElemento.Precio * element.cantidadElemento;
         }
@@ -16,10 +16,10 @@ function renderizarMostrarPedido(clientesesion,req,res) {
     clientesesion.pedidoActual.totalPedido=_subtotal + clientesesion.pedidoActual.gastosEnvio;
 
     //actualizar variable de session del cliente con pedido modificado
-    req.session.datoscliente = _cliente;
+    req.session.datoscliente = clientesesion;
 
     //renderizar vista mostrar pedido.hbs
-    res.status(200).render('Pedido/MostrarPedido.hbs', { layout: null , cliente: _cliente });
+    res.status(200).render('Pedido/MostrarPedido.hbs', { layout: null , cliente: clientesesion });
 
 }
 
@@ -54,12 +54,42 @@ module.exports={
             var _isbn13=req.params.isbn13;
             var _cliente=req.session.datoscliente;
 
+            _cliente.pedidoActual.elementosPedido.forEach( (elem,index) => 
+                {        
+                    if(elem.libroElemento.ISBN13==_isbn13)
+                    {
+                        _cliente.pedidoActual.elementosPedido[index].cantidadElemento += 1;
+                    }
+                }
+            );
+
+            renderizarMostrarPedido(_cliente,req,res);
+
         } catch (error) {
             console.log('error al sumar nuevo libro al pedido...',error);
         }
     },
     restarCantidadLibro: async (req,res,next) => {
+        try {
+            var _isbn13=req.params.isbn13;
+            var _cliente=req.session.datoscliente;
 
+            _cliente.pedidoActual.elementosPedido.forEach( (elem,index) => 
+                {        
+                    if(elem.libroElemento.ISBN13==_isbn13)
+                    {
+                        if(elem.cantidadElemento > 1){
+                            _cliente.pedidoActual.elementosPedido[index].cantidadElemento -= 1;
+                        }
+                    }
+                }
+            );
+
+            renderizarMostrarPedido(_cliente,req,res);
+
+        } catch (error) {
+            console.log('error al restar libro al pedido...',error);
+        }
     },
     eliminarLibroPedido: async (req,res,next) =>{
         try {

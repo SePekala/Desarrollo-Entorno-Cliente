@@ -8,7 +8,7 @@ var pedidoSchema=mongoose.Schema(
         estadoPedido: {type: String, default: 'generando'},
         elementosPedido:[
             {
-                LibroElemento: { type: mongoose.Schema.Types.ObjectId, ref:'Libro' },
+                libroElemento: { type: mongoose.Schema.Types.ObjectId, ref:'Libro' },
                 cantidadElemento:{ type: Number, required: true, default: 1}
             }
         ],
