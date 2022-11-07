@@ -58,7 +58,7 @@ module.exports={
                 {        
                     if(elem.libroElemento.ISBN13==_isbn13)
                     {
-                        _cliente.pedidoActual.elementosPedido[index].cantidadElemento += 1;
+                        elem.cantidadElemento += 1;
                     }
                 }
             );

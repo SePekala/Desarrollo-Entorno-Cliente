@@ -5,6 +5,6 @@ var router=express.Router();
 
 var TiendaController=require('../controllers/tiendaController');
 
-router.get('/RecuperaLibros/:idcat', TiendaController.recuperaLibros);
+router.get('/RecuperaLibros/:idcat?', TiendaController.recuperaLibros);
 
 module.exports=router;
