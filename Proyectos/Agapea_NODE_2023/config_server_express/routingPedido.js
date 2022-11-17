@@ -8,4 +8,5 @@ router.get('/SumarCantidadLibro/:isbn13',PedidoController.sumarCantidadLibro);
 router.get('/RestarCantidadLibro/:isbn13',PedidoController.restarCantidadLibro);
 router.get('/EliminarLibroPedido/:isbn13',PedidoController.eliminarLibroPedido)
 
+router.post('/FinalizarPedido',PedidoController.finalizarPedido);
 module.exports=router;

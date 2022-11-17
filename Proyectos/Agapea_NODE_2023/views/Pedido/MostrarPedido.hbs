@@ -1,25 +1,299 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bienvenido a la tienda de libros Agapea.com</title>
-    <script src="https://kit.fontawesome.com/23c8e300a1.js" crossorigin="anonymous"></script>
-    <!-- jquery -->
-    <script src="https://code.jquery.com/jquery-3.6.1.js" integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI=" crossorigin="anonymous"></script>
-    <!-- estilos y estas cosas-->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+    <title>Bienvenido a la tienda de libros de Agapea.com</title>
+    <script src="
+https://kit.fontawesome.com/59d12739b5.js
+" crossorigin="anonymous"></script>
+
+    <!-- estilos y librerias bootstrap -->
+    <script src="
+https://cdn.jsdelivr.net/npm/@popperjs/core
+" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
+    <script src="
+https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js
+" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
+    <link href="
+https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css
+" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi"
+        crossorigin="anonymous">
+    <script src="
+https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js
+" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+
+    <!-- jquewry libreria descomprimida-->
+    <script src="
+https://code.jquery.com/jquery-3.6.1.js
+" integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI=" crossorigin="anonymous"></script>
 </head>
+
 <body>
     <div class="container">
         <div class="row">
             <!-- columna para direcciones y pago -->
             <div class="col-8">
+                <form id="formpedido" method="post" action="
+http://localhost:3000/Pedido/FinalizarPedido
+">
 
+                    <div class="container">
+                        <div class="row mt-4">
+                            <div class="col-1"><img src="/public/images/img1_mostrar_pedido_datosentrega.png"
+                                    style="width: 40px;height:26px;" /></div>
+                            <div class="col-11">
+                                <h4><strong>1.- Datos de entrega</strong></h4>
+                            </div>
+                        </div>
+                        <div class="row">
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="direccionradios"
+                                    id="direccionprincipal" value="direccionprincipal" checked>
+                                <label class="form-check-label" for="direccionprincipal">
+                                    {{direccionprincipal.calle}}. {{direccionprincipal.municipio.DMUN50}}, {{
+                                    direccionprincipal.provincia.PRO
+                                    }} CP: {{direccionprincipal.cp}}. {{direcccionprincipal.pais}}
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="direccionradios" id="direccionagapea"
+                                    disabled>
+                                <label class="form-check-label" for="direccionagapea">
+                                    Recoger en libreria Agapea (No disponible en este momento. Puede hacer el pedido
+                                    para el envio a domicilio)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="direccionradios" id="direccionotra"
+                                    value="otradireccion">
+                                <label class="form-check-label" for="direccionotra">
+                                    Recibir en otra direccion
+                                </label>
+                            </div>
+
+                        </div>
+
+                        <!-- campos para nueva direccion envio -->
+                        <div class="row mt-2" id="filadireccioncontainer">
+
+                            <div class="container" id="direccioncontainer">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <label for="inputCalle" class="form-label">Direccion de Envio:</label>
+                                        <input type="text" class="form-control" id="inputCalle"
+                                            placeholder="Mi Direccion" name="calle">
+                                    </div>
+
+                                    <div class="col-6">
+                                        <label for="inputCP" class="form-label">Codigo Postal:</label>
+                                        <input type="text" class="form-control" id="inputCP"
+                                            placeholder="Codigo Postal: 28803" name="cp">
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="inputPais" class="form-label">Pais:</label>
+                                        <input type="text" class="form-control" id="inputPais" placeholder="España"
+                                            name="pais">
+                                    </div>
+
+
+                                    <div class="col-6">
+                                        <label for="inputProvincia" class="form-label">Provincia:</label>
+                                        <select id="inputProvincia" class="form-select" name="provincia">
+                                            <option value="-1" selected> - Seleccionar Provincia - </option>
+                                            {{#each provincias}}
+                                            <option value="{{this.CPRO}}-{{
+this.PRO
+}}">{{
+                                                this.PRO
+                                                }}</option>
+                                            {{/each}}
+                                        </select>
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="inputMunicipio" class="form-label">Municipio:</label>
+                                        <select id="inputMunicipio" class="form-select" name="municipio" disabled>
+                                            <option value="-1" selected> - Selecciona un Municipio -</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <!-- ---------------------------------------------------------- -->
+
+                        <div class="row mt-2">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="inputNombre" class="form-label">Nombre *</label>
+                                        <input type="text" class="form-control" id="inputNombre" name="nombre"
+                                            value="{{cliente.nombre}}">
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="inputApellidos" class="form-label">Apellidos *</label>
+                                        <input type="text" class="form-control" id="inputApellidos" name="apellidos"
+                                            value="{{cliente.apellidos}}">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="inputEmail" class="form-label">Correo electronico *</label>
+                                        <input type="email" class="form-control" id="inputEmail" name="email" value="{{
+cliente.cuenta.email
+}}">
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="inputTelefono" class="form-label">Telefono de contacto *</label>
+                                        <input type="text" class="form-control" id="inputTelefono" name="telefono"
+                                            value="{{cliente.telefono}}">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <label for="inputOtrosDatos" class="form-label">Otros datos de entrega <span
+                                            class="text-mutted"><small>(Max. 50 caracteres)</small></span></label>
+                                    <input type="text" class="form-control" id="inputOtrosDatos" name="otrosdatos">
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="checkfactura">
+                                <label class="form-check-label" for="checkfactura">
+                                    Deseo Factura
+                                </label>
+                            </div>
+                        </div>
+                        <!-- campos nif/cif para factura-->
+                        <div class="row" id="filafacturacontainer">
+                            <div class="container" id="facturacontainer">
+
+                                <div class="row mt-4">
+                                    <div class="col-1"><img src="/public/images/img2_mostrar_pedido_factura.png"
+                                            style="width: 40px;height:26px;" /></div>
+                                    <div class="col-11">
+                                        <h4><strong>2.- Datos para su factura</strong></h4>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="datosfactura"
+                                                id="datosfacturaempresa" checked value="facturaempresa">
+                                            <label class="form-check-label" for="datosfacturaempresa">
+                                                Empresa
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="datosfactura"
+                                                id="datosfacturaparticular" value="facturaparticular">
+                                            <label class="form-check-label" for="datosfacturaparticular">
+                                                Profesional, particular o autononmo
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="inputEmpresa" class="form-label">Nombre de la empresa</label>
+                                        <input type="text" class="form-control" id="inputEmpresa" name="nombreEmpresa">
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="inputCIF" class="form-label">CIF</label>
+                                        <input type="text" class="form-control" id="inputCIF" name="cifEmpresa">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- ------------------------------------------------- -->
+
+                        <div class="row mt-4">
+                            <div class="col-1"><img src="/public/images/im3_motrar_pedido_pago.png"
+                                    style="width: 40px;height:26px;" /></div>
+                            <div class="col-11" id="txtpago">
+                                <h4><strong>2.- Pago</strong></h4>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="pagoradios" id="pagotarjeta" checked
+                                    value="pagocard">
+                                <label class="form-check-label" for="pagotarjeta">
+                                    Pago con tarjeta
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="pagoradios" id="pagopaypal"
+                                    value="pagopaypal">
+                                <label class="form-check-label" for="pagopaypal">
+                                    Pago mediante <img src="/public/images/im3_motrar_pedido_pago_paypal.png" />
+                                </label>
+                            </div>
+
+                        </div>
+                        <!-- datos tarjeta si radio pagostarjeta checkeado-->
+                        <div class="row mt-2">
+                            <div class="container" id="datoscard" style="background:#ededed">
+                                <div class="row">
+                                    <h5>Datos de la tarjeta</h5>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="inputNumero" class="form-label">Numero de tarjeta *</label>
+                                        <input type="text" class="form-control" id="inputNumero" name="numerocard">
+                                    </div>
+                                    <div class="col-3">
+                                        <label class="form-label" for="inputMes">Fecha de caducidad: Mes </label>
+                                        <select id="inputMes" class="form-select" name="mescard">
+                                            {{#each meses}}
+                                            <option value="{{@index}}-{{this}}">{{this}}</option>
+                                            {{/each}}
+                                        </select>
+                                    </div>
+                                    <div class="col-2">
+                                        <label class="form-label" for="inputAnio">/ Año * </label>
+                                        <select id="inputAnio" class="form-select" name="aniocard">
+                                            {{#each anios}}
+                                            <option value="{{this}}">{{this}}</option>
+                                            {{/each}}
+                                        </select>
+                                    </div>
+                                    <div class="col-1">
+                                        <label for="inputCVV" class="form-label">CVV *</label>
+                                        <input type="text" class="form-control" id="inputCVV" name="cvv">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <label for="inputNombreBanco" class="form-label">Nombre del Banco de la
+                                        tarjeta</label>
+                                    <input type="text" class="form-control" id="inputNombreBanco"
+                                        name="nombrebancocard">
+                                </div>
+                                <div class="row"><img src="/public/images/im3_motrar_pedido_pago_tarjetas.png"
+                                        style="width: 200px; height: 41px;"> Pago seguro 100% garantizado</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-3"></div>
+                            <div class="col-9">
+                                <a onclick="javascript:$('#formpedido').submit();" class="btn btn-primary btn-lg">
+                                    <i class="fa-solid fa-truck-fast"></i> Finalizar Pedido
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
             </div>
+
             <!-- columna para elementos pedido -->
             <div class="col-4">
                 <div class="container">
@@ -34,32 +308,165 @@
                     {{/each}}
                     <hr>
                     <div class="row">
-                        <div class="col-10"> <p><strong>SubTotal: </strong></p> </div>
-                        <div class="col-2"><span style="color:red;">{{ cliente.pedidoActual.subTotalPedido }} €</span></div>
-                    </div>
-                    <div class="row">
-                        <div class="col-10"> <p><strong>Gastos de envio y gestion: </strong></p> </div>
-                        <div class="col-2"><span style="color:red;">{{ cliente.pedidoActual.gastosEnvio }} €</span></div>
-                    </div>
-                    <div class="row">
-                        <div class="col-10"> <p><strong>Total a pagar: </strong></p> </div>
-                        <div class="col-2"><span style="color:red;">{{ cliente.pedidoActual.totalPedido }} €</span></div>   
+                        <div class="col-10">
+                            <p><strong>SubTotal: </strong></p>
+                        </div>
+                        <div class="col-2"><span style="color:red;">{{ cliente.pedidoActual.subTotalPedido}} €</span>
+                        </div>
                     </div>
 
-                    <div class="row"><small>El pedido de entrega es de <span style="color: green;">1 a 7 días laborales.</span></small></div>
+                    <div class="row">
+                        <div class="col-10">
+                            <p><strong>Gastos de envio y gestion: </strong></p>
+                        </div>
+                        <div class="col-2"><span style="color:red;">{{ cliente.pedidoActual.gastosEnvio}} €</span></div>
+                    </div>
+                    <div class="row" style="background:#ededed;">
+                        <div class="col-10">
+                            <p><strong>Total a pagar: </strong></p>
+                        </div>
+                        <div class="col-2"><span style="color:red;">{{ cliente.pedidoActual.totalPedido}} €</span></div>
+                    </div>
+
+                    <div class="row"><small>El periodo de entrega es de <span style="color:green;">1 a 7 dias
+                                laborales.</span></small></div>
 
                     <div class="row">
                         <div class="col-6">
-                            <a href="http://localhost:3000/Tienda/RecuperaLibros" class="btn btn-outline-primary"><i class="fa-solid fa-book">Seguir Comprando</i></a>
+                            <a href="
+http://localhost:3000/Tienda/RecuperaLibros
+" class="btn btn-outline-primary">
+                                <i class="fa-solid fa-book"></i> Seguir Comprando
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a onclick="javascript:$('#formpedido').submit();" class="btn btn-primary">
+                                <i class="fa-solid fa-truck-fast"></i> Finalizar Pedido
+                            </a>
                         </div>
 
-                         <div class="col-6">
-                            <a href="http://localhost:3000/Tienda/FinalizarPedido" class="btn btn-outline-primary"><i class="fa-regular fa-truck-fast">Finalizar Pedido</i></a>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <script>
+
+        var divfacturacontainer;
+        var divdireccioncontainer;
+        $(document).ready(
+            ev => {
+                divfacturacontainer = $('#facturacontainer').detach();
+                divdireccioncontainer = $('#direccioncontainer').detach();
+            }
+        )
+        //si seleccion otra direccion de entrega  muestro campos para nueva direccion...
+        $('input[name="direccionradios"]').change(
+            ev => {
+                console.log($(
+                    ev.target
+                ).next('label').text());
+                if ($(
+                    ev.target
+                ).next('label').text().trim().startsWith('Recibir')) {
+                    divdireccioncontainer.appendTo($('#filadireccioncontainer'));
+                } else {
+                    divdireccioncontainer = $('#direccioncontainer').detach();
+                }
+            }
+        );
+
+        //si chequeo el querer factura, activo cajas para q muestre nif o cif empresa
+        //tengo q cambiar las cajas de texto si es empresa o particular...q coñazo
+        $('#checkfactura').change(
+            function () {
+
+                if ($(this).is(':checked')) {
+                    //$('#facturacontainer').attr('style','visibility:visible;');
+                    divfacturacontainer.appendTo($('#filafacturacontainer'));
+                    $('#txtpago strong').text("3.- Pago");
+
+                } else {
+                    //$('#facturacontainer').attr('style','visibility:hidden;');
+                    divfacturacontainer = $('#facturacontainer').detach();
+                    $('#txtpago strong').text("2.- Pago");
+                }
+            }
+        );
+
+        $('input[name="datosfactura"]').change(
+            (ev) => {
+                if ($(
+                    ev.target
+                ).next('label').text().trim().startsWith('Empresa')) {
+                    $('#inputEmpresa').prev('label').text('Apellidos y nombre');
+                    $('#inputCIF').prev('label').text('CIF');
+
+                } else {
+                    $('#inputEmpresa').prev('label').text('Apellidos y nombre');
+                    $('#inputCIF').prev('label').text('NIF');
+                }
+            }
+        );
+
+        //si selecciono pago con paypal oculto el div. con al info del pago con tarjeta...
+        $('input[name="pagoradios"]').change(
+            (ev) => {
+                if ($(
+                    ev.target
+                ).next('label').text().trim().endsWith('tarjeta')) {
+                    $('#datoscard').attr('style', 'visibility:visible;');
+                } else {
+                    $('#datoscard').attr('style', 'visibility:hidden;');
+
+                }
+            }
+        );
+
+        //evento CHANGE sobre el select PROVINCIA para hacer una peticion AJAX al servicio externo y recuperar los municipios de esa provincia
+        //https://apiv1.geoapi.es/municipios? CPRO=xxxx & type=JSON & key= & sandbox=1
+
+        $('#inputProvincia').change(
+            function (ev) {
+                var _cpro = ev.target.value.split('-')[0];
+                if (_cpro != "0") { //se ha seleccionado opcion difererente a - Seleccciona Provincia - 
+                    //haces pet.Ajax, recibes el resultado un JSON y en su prop .data esta el array de objetos JSON de tipo Municipio
+                    // 
+                    https://apiv1.geoapi.es/municipios
+ ? CPRO = XXXXX & type=JSON & key=& sandbox=1
+                    //te recorres ese array y con jquery añades un option al select municipio
+                    $('#inputMunicipio').removeAttr('disabled');
+
+                    var _petAjax = new XMLHttpRequest();
+                    _petAjax.open('GET', `https://apiv1.geoapi.es/municipios?CPRO=${_cpro}&type=JSON&key=&sandbox=1`);
+                    _petAjax.addEventListener('readystatechange', function (evajax) {
+                        if (_petAjax.readyState == 4 && _petAjax.status == 200) {
+                            var _respREST = JSON.parse(_petAjax.responseText);
+
+                            //vaciar los option precargados... en variable nodo se carga cada option del select inputMunicipio
+                            // <option value="xxx-nombre municpio">...</option> <=== nodo
+                            Array.from(document.getElementById('inputMunicipio').children)
+                                .forEach(nodo => document.getElementById('inputMunicipio').remove(nodo));
+
+                            document.getElementById('inputMunicipio').append('<option value="-1">- Selecciona un Municipio -</option>');
+                            _respREST.data.forEach(
+                                (muni) => {
+                                    var option = document.createElement('option');
+                                    option.setAttribute('value', muni.CMUM + '-' + muni.DMUN50);
+                                    option.append(document.createTextNode(muni.DMUN50));
+
+                                    document.getElementById('inputMunicipio').append(option);
+                                }
+                            );
+                        }
+                    });
+                    _petAjax.send();
+
+                }
+            }
+        );
+
+    </script>
 </body>
+
 </html>
