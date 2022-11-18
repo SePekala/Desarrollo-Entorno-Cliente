@@ -1,12 +1,30 @@
+var axios=require("axios");
+var mongoose=require('mongoose');
+
+//------------------ pago con tarjeta usando stripe ------------
 var stripe=require('stripe')(process.env.SECRETKEY_STRIPE_ID)
+
+//------------------ pago con paypal ------------
+var paypal=require('paypal-rest-sdk');
+paypal.configure( 
+    {
+        'mode': 'sandbox',
+        'cliente_id': process.env.PAYPAL_CLIENTEID,
+        'client_secret': process.env.PAYPAL_CLIENTESECRET
+    }
+);
+
+//------------------ generacion facturas pdf ------------
 var PDFDocument=require('pdfkit-table');
+var fs=require('fs');
+
+//------------------ modelo de datos en mongo ------------
 
 var Direccion = require('../models/direccion');
 var Libro=require('../models/libro');
 var Pedido=require('../models/pedido');
 var Cliente=require('../models/cliente');
-var mongoose=require('mongoose');
-var axios=require("axios");
+const cliente = require("../models/cliente");
 
 async function renderizarMostrarPedido(clientesesion,req,res) {
 
@@ -50,18 +68,28 @@ async function finalizarPedidoOK(nuevadireccion,datosfacturacion,clientesession,
 
     if( ! Object.keys(nuevadireccion).length == 0 ) {
         //hacer transaccion para dos querys, el insert en direcciones y el update en clientes...
-        var _session = await mongoose.connection.startSession();
-        _session.startTransaction;
-        var _newdirecc = await new Direccion(nuevadireccion).save( {session: _session} );
+        try {
+            var _session = await mongoose.connection.startSession();
+            _session.startTransaction();
 
-        //var _updatecliente = await new Cliente.updateOne({_id: clientesession._id},{direcciones});
+            var _newdirecc = await new Direccion(nuevadireccion).save( {session: _session} );
+
+            var _updatecliente = await Cliente.findByIdAndUpdate(
+                                                            {_id: clientesession._id},
+                                                            {$push: {direcciones: _newdirecc.id} })
+                                                .session(_session);
+            _session.commitTransaction();
+        } catch (error) {
+            console.log('error en operacion contra mongo al crear nueva direccion de contacto y modificar cliente...',error);
+            _session.abortTransaction();
+        }
     }
 
     //genero factura pdf y mando por correo
     var _factura=new PDFDocument();
-    _factura.pipe(`${__dirname}/../infraestructura/facturas_pdf/factura__${clientesesion._id.toString()}__${clientesesion.pedidoActual._id.toString()}.pdf`);
+    _factura.pipe(fs.createWriteStream(`${__dirname}/../infraestructura/facturas_pdf/factura__${clientesesion._id.toString()}__${clientesesion.pedidoActual._id.toString()}.pdf`));
     _factura.fontSize(12).text(`RESUMEN DEL PEDIDO CON ID: ${clientesession.pedidoActual._id.toString()}`);
-    var _filas;
+    var _filas = [];
     clientesession.pedidoActual.elementosPedido.forEach( item => {
         _filas.push(
             [
@@ -76,19 +104,24 @@ async function finalizarPedidoOK(nuevadireccion,datosfacturacion,clientesession,
         {
             header:['Titulo del libro', 'Precio','Cantidad','Subtotal por Libro'],
             rows: _filas
-        }
+        },
+        { width: 300 }
     );
+    _factura.fontSize(10).text('Subtotal pedido: ' + clientesession.pedidoActual.subTotalPedido + '€');
+    _factura.fontSize(8).text('Gastos de envio: ' + clientesession.pedidoActual.gastosEnvio + '€');
+    _factura.fontSize(12).text('Total pedido: ' + clientesession.pedidoActual.totalPedido + '€');
+
     _factura.end();
     //actualizo variable de sesion...
 
     var _pedidoactual = clientesession.pedidoActual;
 
-    _clliente.pedidos.add(_pedidoactual);
+    _clliente.pedidos.push(_pedidoactual);
     _cliente.pedidoActual={};
 
     req.session.datoscliente=clientesession;
 
-    res.status(200).render('FinalizarPedidoOK.hbs',{ layout: '__Layout.hbs', pedidoactual: _pedidoactual});
+    res.status(200).render('Pedido/FinalizarPedidoOK.hbs',{ layout: '__Layout.hbs', pedidoactual: _pedidoactual});
 }
 
 module.exports={
@@ -265,11 +298,12 @@ module.exports={
                     );
                     console.log('cargo creado a la tarjeta de forma correcta...',_cargo);
 
-                    if(_cargo.status == "succeed")
+                    if(_cargo.status == "succeeded")
                     {
                         //metemos en mongodb la nueva direccion...
                         //crear pdf con la factura...
                         //redireccionar a vista FinalizarPedidoOk
+                        console.log('vamos a generar la factura y demas cosas...');
                         await finalizarPedidoOK(
                                                 direccionradios=='otradireccion' ? _direccionPedido: {},
                                                 { nombrefactura: nombreEmpresa, idFactura: cifEmpresa},
@@ -287,13 +321,116 @@ module.exports={
 
             }
             else{
-            //#region -------- pago con paypal ---------
 
-            //#endregion
+                //#region -------- pago con paypal ---------
+                //tengo q meter en variables de sesion los datos de la nueva direccion y los datos de la persona de contacto para la factura
+                //para q pueda acceder a ellos la funcion de vuelta de paypal
+                req.session.otradireccion=_direccionPedido;
+                req.session.datosfacturacion= { nombrefactura: nombre, apellidosfactura: apellidos, telefonofactura: telefono, emailfactura: email};
+                //nos creamos directamente el cargo contra paypal
+                    var create_payment_json = {
+                        "intent": "sale",
+                        "payer": {
+                            "payment_method": "paypal"
+                        },
+                        "redirect_urls": {
+                            "return_url": `http://localhost:3000/Pedido/PayPalCallback?guid=${_cliente.pedidoActual._id}`,
+                            "cancel_url": `http://localhost:3000/Pedido/PayPalCallback?guid=${_cliente.pedidoActual._id}&Cancel=true`
+                        },
+                        "transactions": 
+                        [ //array de objetos transaccion, con una unica propiedad "item_list"
+                            {
+                                "item_list": { //dentro de la prop.item_list de cada transaccion, hay una propiedad "items"
+                                                //q es un array de objetos de tipo item q representan cada elemento del pedido
+                                "items": _cliente.pedidoActual
+                                        .elementosPedido
+                                        .map( itempedido =>{
+                                                return {
+                                                    "name": itempedido.libroElemento.Titulo,
+                                                    "sku": itempedido.libroElemento.ISBN13,
+                                                    "price": itempedido.libroElemento.Precio.toString(),
+                                                    "currency": "EUR",
+                                                    "quantity": itempedido.cantidadElemento
+                                                }
+                                            }
+                                        )
+          
+                                },
+                                "amount": {
+                                    "currency": "EUR",
+                                    "details": {
+                                        "tax":"0",
+                                        "shipping": _cliente.pedidoActual.gastosEnvio.toString(),
+                                        "subtotal": _cliente.pedidoActual.subTotalPedido.toString()
+                                    },
+                                    "total": _cliente.pedidoActual.totalPedido.toString()
+                                },
+                                "description": `Pago del pedido en AGAPEA.COM con id: ${_cliente.pedidoActual._id} con fecha: ${_cliente.pedidoActual.fechaPedido.toString()}`
+                            }
+                        ]
+                    }; 
+                paypal.payment.create(create_payment_json, function name(error,payment) {
+                    if(error){
+                        throw error;
+                    }
+                    else{
+                        //redirigir al cliente a paypal para q acepte el pago recien creado...usando las url q genera
+                        //la propiedad "links" del objeto payment recien creado estan estas direcciones, hasy q usar la
+                        //q contiene "approval_url" y redireccionar
+
+                        var _urlPaypal= payment.links.filter(link => link.rel=='approval_url')[0].href;
+                        res.redirect(_urlPaypal);
+                       
+                    }
+                })
+                //#endregion
 
             }
         } catch (error) {
             
         }
+    },
+    paypalcallback: async (req,res,next)=>{
+        //en la url estan como parametros:
+        // - guid <--- el id del pedido
+        // - Cancel <--- si es true, es q el cliente ha cancelado el pago con paypal
+        // - PayerID <--- añadido por paypal, el id del cliente en paypal
+        // - paymentId <---añadido por paypal como el id del pago
+        var _payerId=req.query.PayerID; 
+        var _paymentId=req.query.paymentId; 
+        var _guid=req.query.guid; 
+        var _cancel=req.query.Cancel; 
+
+        if(_cancel){
+            //pago cancelado, mostramos errores en vista MostrarPedido
+            req.session.errores='Pago cancelado en PayPal, intentalo por otro medio o mas tarde de nuevo con PayPal...'
+            res.status(200).redirect('http://localhost:3000/Pedido/MostrarPedido');
+        }
+
+        //hacemos efectivo el pago del cliente
+        paypal.payment.execute(_paymentId,
+                                {"payer_id": _payerId},
+                                async function(error,payment) {
+                                    if(error){
+                                        console.log('error a la hora de ejecutar l cobro del pago del cliente...',error);
+                                        req.session.errores='Error a la hora de ejecutar el cobro del pago del cliente..., intentalo por otro medio o mas tarde de nuevo con PayPal...'
+                                        res.status(200).redirect('http://localhost:3000/Pedido/MostrarPedido');
+                                    }
+                                    else{
+                                        console.log('pago cargado correctamente...',payment);
+                                        await finalizarPedidoOK(
+                                            req.session.otradireccion,
+                                            req.session.datosfacturacion,
+                                            req.session.datoscliente,
+                                            req,
+                                            res
+                                        );
+                                    }
+                                }      
+                            );
+    },
+    mostrarPedido: async(req,res,next) => {
+        var _cliente=req.session.datoscliente;
+        await renderizarMostrarPedido(_cliente,req,res);
     }
 }

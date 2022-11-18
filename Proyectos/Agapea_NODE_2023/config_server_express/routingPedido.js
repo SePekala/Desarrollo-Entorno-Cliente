@@ -9,4 +9,7 @@ router.get('/RestarCantidadLibro/:isbn13',PedidoController.restarCantidadLibro);
 router.get('/EliminarLibroPedido/:isbn13',PedidoController.eliminarLibroPedido)
 
 router.post('/FinalizarPedido',PedidoController.finalizarPedido);
+router.get('/PayPalCallback',PedidoController.paypalcallback);
+router.get('/MostrarPedido', PedidoControleer.mostrarPedido);
+
 module.exports=router;
