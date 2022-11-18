@@ -6,10 +6,13 @@ var Libro=require('../models/libro');
 var Pedido=require('../models/pedido');
 var Cliente=require('../models/cliente');
 var mongoose=require('mongoose');
+var axios=require("axios");
 
-function renderizarMostrarPedido(clientesesion,req,res) {
+async function renderizarMostrarPedido(clientesesion,req,res) {
 
     //actualizar el subtotal y total del pedido
+    var _respRest= await axios.get('https://apiv1.geoapi.es/provincias?type=JSON&key=&sandbox=1');
+
     var _subtotal=0;
 
     clientesesion.pedidoActual.elementosPedido.forEach(element => 
@@ -25,7 +28,18 @@ function renderizarMostrarPedido(clientesesion,req,res) {
     req.session.datoscliente = clientesesion;
 
     //renderizar vista mostrar pedido.hbs
-    res.status(200).render('Pedido/MostrarPedido.hbs', { layout: null , cliente: clientesesion });
+    res.status(200).render('Pedido/MostrarPedido.hbs', { 
+        layout: null , 
+        cliente: clientesesion ,
+        meses: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+        anios: Array.from(
+            { length: 5 },
+            (el, pos) => pos + new Date(Date.now()).getFullYear()
+        ),
+        direccionprincipal: clientesesion.direcciones.filter( (item) => item.esPrincipal==true)[0],
+        provincias: _respRest.data.data
+    
+    });
 }
 
 async function finalizarPedidoOK(nuevadireccion,datosfacturacion,clientesession,req,res){
@@ -197,79 +211,79 @@ module.exports={
             }
 
             if(pagoradios=='pagocard'){
-            //#region -------- pago con tarjeta de credito ---------
-            //habria que comprobar si el cliente esta dado de alta en stripe ya, incluida su tarjeta...
-            //1º crear un objeto Customer
-            var _customer=await stripe.customers.create(
-                {
-                    email: _cliente.cuenta.email,
-                    name: _cliente.nombre + " " + _cliente.apellidos,
-                    phone: _cliente.telefono,
-                    address:{
-                        city: _direccionPedido.municipio.DMUN50,
-                        country: _direccionPedido.pais,
-                        state: _direccionPedido.provincia.PRO,
-                        postal_code: _direccionPedido.cp,
-                        line1: _direccionPedido.calle
-                    },
-                    metadata: { '_id': _cliente._id, 'fechaNacimiento': _cliente.fechaNacimiento }
-                }
-            );
+                //#region -------- pago con tarjeta de credito ---------
+                    //habria que comprobar si el cliente esta dado de alta en stripe ya, incluida su tarjeta...
+                    //1º crear un objeto Customer
+                    var _customer=await stripe.customers.create(
+                        {
+                            email: _cliente.cuenta.email,
+                            name: _cliente.nombre + " " + _cliente.apellidos,
+                            phone: _cliente.telefono,
+                            address:{
+                                city: _direccionPedido.municipio.DMUN50,
+                                country: _direccionPedido.pais,
+                                state: _direccionPedido.provincia.PRO,
+                                postal_code: _direccionPedido.cp,
+                                line1: _direccionPedido.calle
+                            },
+                            metadata: { '_id': _cliente._id, 'fechaNacimiento': _cliente.fechaNacimiento }
+                        }
+                    );
 
-            console.log('cliente en stripe creado...',_customer);
+                    console.log('cliente en stripe creado...',_customer);
 
-            //2º paso añadir tarjeta de credito al cliente, necesitas token para la tarjeta antes
-            //https://stripe.com/docs/api/tokens/create_card?lang=node
+                    //2º paso añadir tarjeta de credito al cliente, necesitas token para la tarjeta antes
+                    //https://stripe.com/docs/api/tokens/create_card?lang=node
 
-            var _cardToken = await stripe.tokens.create(
-                {
-                    card: {
-                        number: tarjetacredito.numerocard,
-                        cvc: tarjetacredito.cvv,
-                        name: _cliente.nombre + " " + _cliente.apellidos, 
-                        exp_month: tarjetacredito.mescard.split('-')[0],
-                        exp_year: tarjetacredito.aniocard   
+                    var _cardToken = await stripe.tokens.create(
+                        {
+                            card: {
+                                number: tarjetacredito.numerocard,
+                                cvc: tarjetacredito.cvv,
+                                name: _cliente.nombre + " " + _cliente.apellidos, 
+                                exp_month: tarjetacredito.mescard.split('-')[0],
+                                exp_year: tarjetacredito.aniocard   
+                            }
+                        }
+                    );
+                    console.log('token de la tarjeta con exito...',_cardToken);
+
+                    var _card=await stripe.customers.createSource(_customer.id, { source: _cardToken.id});
+
+                    console.log('tarjeta asociada al cliente...',_card);
+
+                    //3º paso generar el cargo a dicha tarjeta
+                    //https://stripe.com/docs/api/charges/create?lang=node
+                    var _cargo = await stripe.charges.create(
+                        {
+                            amount: _cliente.pedidoActual.totalPedido * 100,
+                            currency: 'eur',
+                            customer: _customer.id,
+                            description: _cliente.pedidoActual._id,
+                            source: _card.id
+                        }
+                    );
+                    console.log('cargo creado a la tarjeta de forma correcta...',_cargo);
+
+                    if(_cargo.status == "succeed")
+                    {
+                        //metemos en mongodb la nueva direccion...
+                        //crear pdf con la factura...
+                        //redireccionar a vista FinalizarPedidoOk
+                        await finalizarPedidoOK(
+                                                direccionradios=='otradireccion' ? _direccionPedido: {},
+                                                { nombrefactura: nombreEmpresa, idFactura: cifEmpresa},
+                                                _cliente,
+                                                req,
+                                                res
+                                                );
                     }
-                }
-            );
-            console.log('token de la tarjeta con exito...',_cardToken);
+                    else
+                    {
+                        res.status(200).redirect('http://localhost:3000/Pedido/MostrarPedido');
+                    }
 
-            var _card=await stripe.customers.createSource(_customer.id, { source: _cardToken.id});
-
-            console.log('tarjeta asociada al cliente...',_card);
-
-            //3º paso generar el cargo a dicha tarjeta
-            //https://stripe.com/docs/api/charges/create?lang=node
-            var _cargo = await stripe.charges.create(
-                {
-                    amount: _cliente.pedidoActual.totalPedido * 100,
-                    currency: 'eur',
-                    customer: _customer.id,
-                    description: _cliente.pedidoActual._id,
-                    source: _card.id
-                }
-            );
-            console.log('cargo creado a la tarjeta de forma correcta...',_cargo);
-
-            if(_cargo.status == "succeed")
-            {
-                //metemos en mongodb la nueva direccion...
-                //crear pdf con la factura...
-                //redireccionar a vista FinalizarPedidoOk
-                await finalizarPedidoOK(
-                                        direccionradios=='otradireccion' ? _direccionPedido: {},
-                                        { nombrefactura: nombreEmpresa, idFactura: cifEmpresa},
-                                        _cliente,
-                                        req,
-                                        res
-                                        );
-            }
-            else
-            {
-                res.status(200).redirect('http://localhost:3000/Pedido/MostrarPedido');
-            }
-
-            //#endregion
+                //#endregion
 
             }
             else{
