@@ -9,7 +9,7 @@ var paypal=require('paypal-rest-sdk');
 paypal.configure( 
     {
         'mode': 'sandbox',
-        'cliente_id': process.env.PAYPAL_CLIENTEID,
+        'client_id': process.env.PAYPAL_CLIENTEID,
         'client_secret': process.env.PAYPAL_CLIENTESECRET
     }
 );
@@ -87,7 +87,7 @@ async function finalizarPedidoOK(nuevadireccion,datosfacturacion,clientesession,
 
     //genero factura pdf y mando por correo
     var _factura=new PDFDocument();
-    _factura.pipe(fs.createWriteStream(`${__dirname}/../infraestructura/facturas_pdf/factura__${clientesesion._id.toString()}__${clientesesion.pedidoActual._id.toString()}.pdf`));
+    _factura.pipe(fs.createWriteStream(`${__dirname}/../infraestructura/facturas_pdf/factura__${clientesession._id.toString()}__${clientesession.pedidoActual._id.toString()}.pdf`));
     _factura.fontSize(12).text(`RESUMEN DEL PEDIDO CON ID: ${clientesession.pedidoActual._id.toString()}`);
     var _filas = [];
     clientesession.pedidoActual.elementosPedido.forEach( item => {
@@ -102,7 +102,7 @@ async function finalizarPedidoOK(nuevadireccion,datosfacturacion,clientesession,
     });
     _factura.table(
         {
-            header:['Titulo del libro', 'Precio','Cantidad','Subtotal por Libro'],
+            headers:['Titulo del libro', 'Precio','Cantidad','Subtotal por Libro'],
             rows: _filas
         },
         { width: 300 }
@@ -116,12 +116,12 @@ async function finalizarPedidoOK(nuevadireccion,datosfacturacion,clientesession,
 
     var _pedidoactual = clientesession.pedidoActual;
 
-    _clliente.pedidos.push(_pedidoactual);
-    _cliente.pedidoActual={};
+    clientesession.pedidos.push(_pedidoactual);
+    clientesession.pedidoActual={};
 
     req.session.datoscliente=clientesession;
 
-    res.status(200).render('Pedido/FinalizarPedidoOK.hbs',{ layout: '__Layout.hbs', pedidoactual: _pedidoactual});
+    res.status(200).render('Pedido/FinalizarPedidoOK.hbs',{ layout: null, pedidoActual: _pedidoactual});
 }
 
 module.exports={
@@ -325,7 +325,12 @@ module.exports={
                 //#region -------- pago con paypal ---------
                 //tengo q meter en variables de sesion los datos de la nueva direccion y los datos de la persona de contacto para la factura
                 //para q pueda acceder a ellos la funcion de vuelta de paypal
-                req.session.otradireccion=_direccionPedido;
+                if(direccionradios=='otradireccion'){
+                    req.session.otradireccion=_direccionPedido;
+                }
+                else{
+                    req.session.otradireccion={};
+                }    
                 req.session.datosfacturacion= { nombrefactura: nombre, apellidosfactura: apellidos, telefonofactura: telefono, emailfactura: email};
                 //nos creamos directamente el cargo contra paypal
                     var create_payment_json = {
@@ -369,7 +374,7 @@ module.exports={
                             }
                         ]
                     }; 
-                paypal.payment.create(create_payment_json, function name(error,payment) {
+                paypal.payment.create(create_payment_json, function(error,payment) {
                     if(error){
                         throw error;
                     }
@@ -382,7 +387,7 @@ module.exports={
                         res.redirect(_urlPaypal);
                        
                     }
-                })
+                });
                 //#endregion
 
             }
