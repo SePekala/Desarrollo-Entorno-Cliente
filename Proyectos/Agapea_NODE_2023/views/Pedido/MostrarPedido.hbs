@@ -230,7 +230,7 @@
                                         <label class="form-label" for="inputMes">Fecha de caducidad: Mes </label>
                                         <select id="inputMes" class="form-select" name="mescard">
                                             {{#each meses}}
-                                            <option value="{{@index}}-{{this}}">{{this}}</option>
+                                            <option value="{{operar @index '+' 1}}-{{this}}">{{this}}</option>
                                             {{/each}}
                                         </select>
                                     </div>
