@@ -1,0 +1,12 @@
+<!-- VISTA PARA MOSTRAR LOS PEDIDOS DEL CLIENTE-->
+
+{{#if (operar cliente.pedidos.length '!=' 0)}}
+    <p>TENEMOS PEDIDOS, LENGTH: {{cliente.pedidos.length}}</p>
+    {{#each cliente.pedidos as |miPedido|}}
+        {{>VistaMiniMisPedidos miPedido}}
+    {{/each}}
+{{else}}
+    <p>LENGTH: {{cliente.pedidos.lenght}}</p>
+    <h3>Aun no has realizado ninguna compra</h3>
+    <p>Dale un vistazo a <a href="http://localhost:3000/Tienda/RecuperaLibros">nuestra tienda</a></p>
+{{/if}}

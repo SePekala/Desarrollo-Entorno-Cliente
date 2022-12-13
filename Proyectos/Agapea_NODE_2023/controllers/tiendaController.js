@@ -30,6 +30,7 @@ module.exports={
         res.status(200).render('Tienda/Libros.hbs',
                                 { 
                                     layout: '__Layout.hbs', 
+                                    sinpanel: 'false',
                                     categorias: await recuperaCats(),
                                     cliente: req.session.datoscliente,
                                     _listalibros:_listalibros
@@ -42,6 +43,7 @@ module.exports={
             res.status(200).render('Tienda/Libros.hbs',
                                 { 
                                     layout: '__Layout.hbs', 
+                                    sinpanel: 'false',
                                     categorias: await recuperaCats(),
                                     cliente: req.session.datoscliente,
                                     _listalibros:[]

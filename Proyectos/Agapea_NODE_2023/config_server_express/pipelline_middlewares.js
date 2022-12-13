@@ -57,6 +57,7 @@ module.exports=function(servidorExpres){
                                 layoutsDir: __dirname + '/../views/shared/Layouts',
                                 partialsDir: __dirname + '/../views/shared/Partials',
                                 helpers: {
+                                   split: (cadena,separador,campo)=> cadena.split(separador)[campo],
                                    json: function (valorASerializar) {
                                         return JSON.stringify(valorASerializar);
                                    },

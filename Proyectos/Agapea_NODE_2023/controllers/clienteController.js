@@ -31,8 +31,8 @@ module.exports = {
                     .populate(
                         [
                             { path: 'cuenta', model: 'Cuenta' },
-                            { path: 'direcciones', model: 'Direccion'}
-                            // { path: 'pedidos', model: 'Pedido'}
+                            { path: 'direcciones', model: 'Direccion'},
+                            { path: 'pedidos', model: 'Pedido'}
                         ]
                     ); //<--OJO!! antes de almacenar los datos del cliente en la sesion
                 //expandir props: direcciones,pedidos, cuenta y crear pedidoActual
@@ -61,7 +61,7 @@ module.exports = {
                 //----------------------------------------
                 req.session.datoscliente = _cliente;
                 //3º redireccionar a InicioPanel
-                res.status(200).redirect('http://localhost:3000/Cliente/InicioPanel');
+                res.status(200).redirect('http://localhost:3000/Cliente/Panel/InicioPanel');
             }
             else {
                 throw new Error({ number: 3, message: 'password invalida' });
@@ -199,9 +199,9 @@ module.exports = {
         var _respRest={};
 
         try {
-
+            console.log('MI VARIABLE DE SESSION: ',req.session.datoscliente);
             var _respRest=await axios.get('https://apiv1.geoapi.es/provincias?type=JSON&key=&sandbox=1'); //json formato: {update_time:'', size:xx,data[]}
-            console.log('datos recibidos...', _respRest);
+            //console.log('datos recibidos...', _respRest);
 
         } catch (error) {
             console.log('error en peticion rest a la hora de obtener provincias...', error);
@@ -210,14 +210,15 @@ module.exports = {
         finally
         {
             res.status(200).render('Cliente/InicioPanel.hbs',
-            {
-                layout: '__LayoutPanelCliente.hbs',
-                cliente: req.session.datoscliente,
-                dias: Array.from({ length: 31 }, (el, pos) => pos + 1),
-                meses: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-                anios: Array.from({ length: new Date(Date.now()).getFullYear() - 1933 }, (el, pos) => pos + 1934),
-                provincias: _respRest.data.data
-            }
+                {
+                    layout: '__LayoutPanelCliente.hbs',
+                    cliente: req.session.datoscliente,
+                    dias: Array.from({ length: 31 }, (el, pos) => pos + 1),
+                    meses: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                    anios: Array.from({ length: new Date(Date.now()).getFullYear() - 1933 }, (el, pos) => pos + 1934),
+                    provincias: _respRest.data.data,
+                    listaOpcPanel: req.opcPanelCliente
+                }
             );
         }
         
@@ -317,7 +318,7 @@ module.exports = {
                     var _updateClientes=await Cliente.findByIdAndUpdate({ _id: _cliente._id }, {$push: { direcciones: _idDirec } }).session(_session);
                     console.log('resultado update en coleccion clientes...', _updateClientes);
 
-                    await _session.commitTransaction();
+                    await _session.commitTransaction(); 
 
                     //3º modificar la variable de sesion datoscliente añadiendo direccion nueva a prop.direcciones
                     _cliente.direcciones.push(_insertDirecc);
@@ -368,6 +369,19 @@ module.exports = {
         } catch (error) {
             console.log(error);
             await _session.abortTransaction();
+        }
+    },
+    miscomprasget: async (req,res,next) => {
+        try {
+            res.status(200).render('Cliente/MisCompras.hbs',
+                {
+                    layout: '__LayoutPanelCliente.hbs',
+                    cliente: req.session.datoscliente,
+                    listaOpcPanel: req.opcPanelCliente
+                }
+            )
+        } catch (error) {
+            console.log('error al cargar tu registro de pedidos...',error);
         }
     }
 

@@ -24,7 +24,6 @@ var Direccion = require('../models/direccion');
 var Libro=require('../models/libro');
 var Pedido=require('../models/pedido');
 var Cliente=require('../models/cliente');
-const cliente = require("../models/cliente");
 
 async function renderizarMostrarPedido(clientesesion,req,res) {
 
@@ -46,18 +45,21 @@ async function renderizarMostrarPedido(clientesesion,req,res) {
     req.session.datoscliente = clientesesion;
 
     //renderizar vista mostrar pedido.hbs
-    res.status(200).render('Pedido/MostrarPedido.hbs', { 
-        layout: null , 
-        cliente: clientesesion ,
-        meses: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-        anios: Array.from(
-            { length: 5 },
-            (el, pos) => pos + new Date(Date.now()).getFullYear()
-        ),
-        direccionprincipal: clientesesion.direcciones.filter( (item) => item.esPrincipal==true)[0],
-        provincias: _respRest.data.data
-    
-    });
+    res.status(200).render('Pedido/MostrarPedido.hbs', 
+                        { 
+                            layout: '__Layout.hbs' ,
+                            sinpanel: 'true', 
+                            cliente: clientesesion ,
+                            meses: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                            anios: Array.from(
+                                { length: 5 },
+                                (el, pos) => pos + new Date(Date.now()).getFullYear()
+                            ),
+                            direccionprincipal: clientesesion.direcciones.filter( (item) => item.esPrincipal==true)[0],
+                            provincias: _respRest.data.data,
+                            errores: req.session.errores
+                        }
+    );
 }
 
 async function finalizarPedidoOK(nuevadireccion,datosfacturacion,clientesession,req,res){
@@ -88,8 +90,19 @@ async function finalizarPedidoOK(nuevadireccion,datosfacturacion,clientesession,
     //genero factura pdf y mando por correo
     var _factura=new PDFDocument();
     _factura.pipe(fs.createWriteStream(`${__dirname}/../infraestructura/facturas_pdf/factura__${clientesession._id.toString()}__${clientesession.pedidoActual._id.toString()}.pdf`));
-    _factura.fontSize(12).text(`RESUMEN DEL PEDIDO CON ID: ${clientesession.pedidoActual._id.toString()}`);
-    var _filas = [];
+
+    _factura.fontSize(8).text(`Factura emitida para ${datosfacturacion.nombreFactura} con documento: ${datosfacturacion.idFactura}`, {align: 'left'});
+    // _factura.moveDown();
+    // _factura.moveDown();
+
+    _factura.fontSize(12).text(`RESUMEN DEL PEDIDO CON ID: ${clientesession.pedidoActual._id.toString()}`, { underline: true });
+    
+    // _factura.moveDown();
+    // _factura.fontSize(6).text(`${clientesession.nombre} ${clientesession.apellidos}`, { align: 'right'} );
+    // _factura.fontSize(6).text(`${nuevadireccion.calle} cp:${nuevadireccion.cp}`, { align: 'right'} );
+    // _factura.fontSize(6).text(`${nuevadireccion.municipio.DMUN50} , ${nuevadireccion.provincia.PRO} `, { align: 'right'} );
+
+    var _filas=[];
     clientesession.pedidoActual.elementosPedido.forEach( item => {
         _filas.push(
             [
@@ -98,20 +111,42 @@ async function finalizarPedidoOK(nuevadireccion,datosfacturacion,clientesession,
                 item.cantidadElemento,
                 (item.cantidadElemento * item.libroElemento.Precio)
             ]
-        ); //cada fila q representa un item del pedido de la tabla es un array columnas...
+        ); //cada fila q representa un item del pedido en la tabla es un array de columnas..
+
     });
+
     _factura.table(
-        {
-            headers:['Titulo del libro', 'Precio','Cantidad','Subtotal por Libro'],
-            rows: _filas
-        },
-        { width: 300 }
-    );
+                {
+                    headers:[ 'Titulo del libro', 'Precio', 'Cantidad', 'Subtotal por Libro'],
+                    rows: _filas               
+                },
+                { width: 300 }
+        );
+
+    _factura.moveDown();
     _factura.fontSize(10).text('Subtotal pedido: ' + clientesession.pedidoActual.subTotalPedido + '€');
     _factura.fontSize(8).text('Gastos de envio: ' + clientesession.pedidoActual.gastosEnvio + '€');
-    _factura.fontSize(12).text('Total pedido: ' + clientesession.pedidoActual.totalPedido + '€');
+    _factura.fontSize(12).text('TOTAL pedido: ' + clientesession.pedidoActual.totalPedido + '€');
 
     _factura.end();
+
+    //meto el pedido en la base de datos
+    try {
+        var _session = await mongoose.connection.startSession();
+        _session.startTransaction();
+
+        var _nuevoPedido = await new Pedido(clientesession.pedidoActual).save( {session: _session} );
+
+        var _updatePedCliente = await Cliente.findByIdAndUpdate(
+                                                        {_id: clientesession._id},
+                                                        {$push: {pedidos: _nuevoPedido.id} })
+                                            .session(_session);
+        _session.commitTransaction();
+    } catch (error) {
+        console.log('error en operacion contra mongo al crear nuevo PEDIDO y modificar cliente...',error);
+        _session.abortTransaction();
+    }
+
     //actualizo variable de sesion...
 
     var _pedidoactual = clientesession.pedidoActual;
@@ -121,7 +156,13 @@ async function finalizarPedidoOK(nuevadireccion,datosfacturacion,clientesession,
 
     req.session.datoscliente=clientesession;
 
-    res.status(200).render('Pedido/FinalizarPedidoOK.hbs',{ layout: null, pedidoActual: _pedidoactual});
+    res.status(200).render('Pedido/FinalizarPedidoOK.hbs',
+                            { 
+                                layout: '__Layout.hbs',
+                                sinpanel: 'true', 
+                                pedidoActual: _pedidoactual
+                            }
+    );
 }
 
 module.exports={

@@ -15,10 +15,32 @@ router.route('/Registro')
 
 router.get('/ActivarCuenta/:id' ,ClienteController.activarcuentaget);
 
-router.get('/InicioPanel', ClienteController.iniciopanelget );
+//#region ...rutas para acceder panel del cliente...
+//--------------------------------------------------
+function cargaPanelCliente(req,res,next){
+        var _listaOpc=[ 
+              "Inicio-InicioPanel",
+              "Mis Compras-MisCompras",
+              "Mis Opiniones-MisOpiniones",
+              "Mis Listas-MisListas"
+              ];
+              req.opcPanelCliente=_listaOpc;
+              next();      
+  }
+  
+router.all("/Panel/*",cargaPanelCliente);
 
-router.post('/UpdateDatosCliente',ClienteController.updateDatosCliente);
+router.get( '/Panel/InicioPanel',ClienteController.iniciopanelget );
+router.get( '/Panel/MisCompras',ClienteController.miscomprasget );
+router.post('/Panel/UpdateDatosCliente', ClienteController.updateDatosCliente);
+router.post('/Panel/OperaDireccion', ClienteController.operaDireccion);
 
-router.post('/OperaDireccion', ClienteController.operaDireccion);
+//#endregion
+
+// router.get('/InicioPanel', ClienteController.iniciopanelget );
+
+// router.post('/UpdateDatosCliente',ClienteController.updateDatosCliente);
+
+// router.post('/OperaDireccion', ClienteController.operaDireccion);
 
 module.exports=router;

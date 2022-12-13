@@ -19,6 +19,13 @@
 
 <body>
     <div class="container">
+        {{#if errores}}
+        <div class="row">
+            <div class="row">
+                <p class="text-danger"><small>* {{errores}}</small></p>
+            </div>
+        </div>
+        {{/if}}
         <div class="row">
             <!-- columna para direcciones y pago -->
             <div class="col-8">

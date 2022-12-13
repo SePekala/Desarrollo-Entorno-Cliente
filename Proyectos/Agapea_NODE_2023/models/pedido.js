@@ -40,4 +40,4 @@ pedidoSchema.methods.CalculaTotalPedido=async function() {
     this.totalPedido=this.subTotalEnvio + this.gastosEnvio;
 }
 
-module.exports=mongoose.model('Pedido',pedidoSchema,'pedidos')
+module.exports=mongoose.model('Pedido',pedidoSchema,'pedidos');
